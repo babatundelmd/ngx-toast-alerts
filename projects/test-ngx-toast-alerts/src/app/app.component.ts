@@ -1,6 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { NgxToastAlertsComponent, NgxToastAlertsService, ToastConfig } from 'ngx-toast-alerts';
+import { NgxToastAlertsComponent, NgxToastAlertsService, NgxToastAlertsConfig } from 'ngx-toast-alerts';
 
 @Component({
   selector: 'app-root',
@@ -12,10 +12,9 @@ import { NgxToastAlertsComponent, NgxToastAlertsService, ToastConfig } from 'ngx
 export class AppComponent implements OnInit {
   title = 'test-ngx-toast-alerts';
   toastService = inject(NgxToastAlertsService);
-  private clickToClose = true; // Add this property
 
   ngOnInit() {
-
+    // Initialize any necessary setup here
   }
 
   showSuccessToast() {

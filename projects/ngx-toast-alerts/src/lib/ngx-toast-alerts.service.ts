@@ -1,15 +1,10 @@
-import { computed, effect, Injectable, signal } from '@angular/core';
+import { computed, effect, inject, Injectable, signal } from '@angular/core';
+import { NGX_TOAST_ALERTS_CONFIG, NgxToastAlertsConfig } from './ngx-toast-alerts-config';
 
 export interface Toast {
   type: 'success' | 'error' | 'info' | 'pending';
   message: string;
-  config: ToastConfig;
-}
-
-export interface ToastConfig {
-  timeout?: number;
-  clickToClose?: boolean;
-  position?: 'top-right' | 'top-left' | 'bottom-left' | 'bottom-right';
+  config: NgxToastAlertsConfig;
 }
 
 @Injectable({
@@ -18,14 +13,18 @@ export interface ToastConfig {
 export class NgxToastAlertsService {
   private toastSignal = signal<Toast | null>(null);
   toast = computed(() => this.toastSignal());
-
-  private defaultConfig: ToastConfig = {
+  private defaultConfig: NgxToastAlertsConfig = {
     timeout: 3000,
-    clickToClose: false,
+    clickToClose: true,
     position: 'top-right'
   };
 
   constructor() {
+    const injectedConfig = inject(NGX_TOAST_ALERTS_CONFIG, { optional: true });
+    if (injectedConfig) {
+      this.defaultConfig = { ...this.defaultConfig, ...injectedConfig };
+    }
+
     effect(() => {
       const currentToast = this.toast();
       if (currentToast) {
@@ -37,28 +36,28 @@ export class NgxToastAlertsService {
     });
   }
 
-  setConfig(config: Partial<ToastConfig>): void {
+  setConfig(config: Partial<NgxToastAlertsConfig>): void {
     this.defaultConfig = { ...this.defaultConfig, ...config };
   }
 
-  success(message: string, config?: Partial<ToastConfig>): void {
+  success(message: string, config?: Partial<NgxToastAlertsConfig>): void {
     this.show('success', message, config);
   }
 
-  error(message: string, config?: Partial<ToastConfig>): void {
+  error(message: string, config?: Partial<NgxToastAlertsConfig>): void {
     this.show('error', message, config);
   }
 
-  info(message: string, config?: Partial<ToastConfig>): void {
+  info(message: string, config?: Partial<NgxToastAlertsConfig>): void {
     this.show('info', message, config);
   }
 
-  pending(message: string, config?: Partial<ToastConfig>): void {
+  pending(message: string, config?: Partial<NgxToastAlertsConfig>): void {
     this.show('pending', message, config);
   }
 
-  private show(type: Toast['type'], message: string, config?: Partial<ToastConfig>): void {
-    const toastConfig: ToastConfig = { ...this.defaultConfig, ...config };
+  private show(type: Toast['type'], message: string, config?: Partial<NgxToastAlertsConfig>): void {
+    const toastConfig: NgxToastAlertsConfig = { ...this.defaultConfig, ...config };
     this.toastSignal.set({ type, message, config: toastConfig });
   }
 
