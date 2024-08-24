@@ -1,32 +1,53 @@
 {
-  "name": "ngx-toast-alerts-workspace",
-  "version": "0.0.0",
+  "name": "ngx-toast-alerts",
+  "version": "1.0.0",
+  "description": "Angular toast alerts library",
+  "author": "Babatunde Lamidi (GhostOfWinterfell",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/ngx-toast-alerts.git"
+  },
+  "keywords": [
+    "angular",
+    "toast",
+    "alerts",
+    "notifications"
+  ],
+  "peerDependencies": {
+    "@angular/common": "^18.2.1",
+    "@angular/core": "^18.2.1"
+  },
+  "dependencies": {
+    "tslib": "^2.3.0"
+  },
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "prepublishOnly": "ng build ngx-toast-alerts --configuration production"
   },
-  "private": true,
-  "dependencies": {
+  "private": false,
+  "devDependencies": {
+    "@angular-devkit/build-angular": "^18.2.1",
     "@angular/animations": "^18.2.1",
+    "@angular/cli": "^18.2.1",
     "@angular/common": "^18.2.1",
     "@angular/compiler": "^18.2.1",
+    "@angular/compiler-cli": "^18.2.1",
     "@angular/core": "^18.2.1",
     "@angular/forms": "^18.2.1",
     "@angular/platform-browser": "^18.2.1",
     "@angular/platform-browser-dynamic": "^18.2.1",
+    "@angular/platform-server": "^18.2.1",
     "@angular/router": "^18.2.1",
-    "rxjs": "~7.8.0",
-    "tslib": "^2.3.0",
-    "zone.js": "~0.14.3"
-  },
-  "devDependencies": {
-    "@angular-devkit/build-angular": "^18.2.1",
-    "@angular/cli": "^18.2.1",
-    "@angular/compiler-cli": "^18.2.1",
+    "@angular/ssr": "^18.2.1",
+    "@types/express": "^4.17.17",
     "@types/jasmine": "~5.1.0",
+    "@types/node": "^18.18.0",
+    "express": "^4.18.2",
     "jasmine-core": "~5.1.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",
@@ -34,6 +55,8 @@
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
     "ng-packagr": "^18.2.1",
-    "typescript": "~5.5.4"
+    "rxjs": "~7.8.0",
+    "typescript": "~5.5.4",
+    "zone.js": "~0.14.3"
   }
 }

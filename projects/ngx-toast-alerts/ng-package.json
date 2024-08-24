@@ -3,5 +3,6 @@
   "dest": "../../dist/ngx-toast-alerts",
   "lib": {
     "entryFile": "src/public-api.ts"
-  }
+  },
+  "allowedNonPeerDependencies": ["tslib"]
 }

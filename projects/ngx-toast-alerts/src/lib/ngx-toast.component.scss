@@ -1,0 +1,181 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
+:host {
+  --toast-success-bg: #4caf50;
+  --toast-success-color: #e7f6e7;
+  --toast-error-bg: #f44336;
+  --toast-error-color: #fdecea;
+  --toast-info-bg: #2196f3;
+  --toast-info-color: #e8f4fd;
+  --toast-pending-bg: #ffc107;
+  --toast-pending-color: #fff8e1;
+  --toast-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --toast-font-family: 'Inter', sans-serif;
+}
+
+.toast-container {
+  position: fixed;
+  z-index: 1000;
+  width: 300px;
+  max-width: 100%;
+  top: 20px;
+  right: 20px;
+
+  &.top-left {
+    left: 20px;
+    right: auto;
+  }
+
+  &.bottom-right {
+    bottom: 20px;
+    top: auto;
+  }
+
+  &.bottom-left {
+    bottom: 20px;
+    left: 20px;
+    top: auto;
+    right: auto;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInTop {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInBottom {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+.toast {
+  padding: 16px;
+  border-radius: 0.5rem;
+  margin-bottom: 16px;
+  font-family: var(--toast-font-family);
+  color: #fff;
+  box-shadow: var(--toast-shadow);
+  transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  animation: slideInRight 0.3s ease-out, fadeOut 0.3s ease-in 2.7s forwards;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  .content {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+
+    h3 {
+      margin: 0;
+      font-weight: 600;
+      font-size: 16px;
+    }
+
+    p {
+      margin: 4px 0 0;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+  }
+
+  &::before {
+    content: '';
+    flex-shrink: 0;
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+
+  &.success {
+    background-color: var(--toast-success-bg);
+    color: var(--toast-success-color);
+    &::before {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23e7f6e7'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z'/%3E%3C/svg%3E");
+    }
+  }
+
+  &.error {
+    background-color: var(--toast-error-bg);
+    color: var(--toast-error-color);
+    &::before {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23fdecea'%3E%3Cpath d='M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z'/%3E%3C/svg%3E");
+    }
+  }
+
+  &.info {
+    background-color: var(--toast-info-bg);
+    color: var(--toast-info-color);
+    &::before {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23e8f4fd'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z'/%3E%3C/svg%3E");
+    }
+  }
+
+  &.pending {
+    background-color: var(--toast-pending-bg);
+    color: var(--toast-pending-color);
+    &::before {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23fff8e1'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z'/%3E%3C/svg%3E");
+    }
+  }
+}
+
+.toast-container.top-left .toast {
+  animation: slideInLeft 0.3s ease-out, fadeOut 0.3s ease-in 2.7s forwards;
+}
+
+.toast-container.bottom-right .toast {
+  animation: slideInRight 0.3s ease-out, fadeOut 0.3s ease-in 2.7s forwards;
+}
+
+.toast-container.bottom-left .toast {
+  animation: slideInLeft 0.3s ease-out, fadeOut 0.3s ease-in 2.7s forwards;
+}

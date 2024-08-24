@@ -1,9 +1,22 @@
 {
   "name": "ngx-toast-alerts",
-  "version": "0.0.1",
+  "version": "1.0.0",
+  "description": "A customizable toast alerts library for Angular applications",
+  "author": "Babatunde Lamidi",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/babatundelmd/ngx-toast-alerts"
+  },
+  "keywords": [
+    "angular",
+    "toast",
+    "alerts",
+    "notifications"
+  ],
   "peerDependencies": {
-    "@angular/common": "^17.3.0",
-    "@angular/core": "^17.3.0"
+    "@angular/common": "^18.0.0",
+    "@angular/core": "^18.0.0"
   },
   "dependencies": {
     "tslib": "^2.3.0"
