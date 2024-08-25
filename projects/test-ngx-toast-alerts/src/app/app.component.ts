@@ -1,11 +1,11 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { NgxToastAlertsComponent, NgxToastAlertsService, NgxToastAlertsConfig } from 'ngx-toast-alerts';
+import { NgxToastAlertsService } from '../../../ngx-toast-alerts/src/lib/ngx-toast-alerts.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, NgxToastAlertsComponent],
+  imports: [RouterOutlet],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })

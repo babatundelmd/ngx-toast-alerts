@@ -1,5 +1,7 @@
-import { computed, effect, inject, Injectable, signal } from '@angular/core';
+import { computed, effect, inject, Injectable, PLATFORM_ID, signal } from '@angular/core';
 import { NGX_TOAST_ALERTS_CONFIG, NgxToastAlertsConfig } from './ngx-toast-alerts-config';
+import { ToastOverlayService } from './toast-overlay.service';
+import { isPlatformBrowser } from '@angular/common';
 
 export interface Toast {
   type: 'success' | 'error' | 'info' | 'pending';
@@ -19,10 +21,17 @@ export class NgxToastAlertsService {
     position: 'top-right'
   };
 
+  private toastOverlay = inject(ToastOverlayService);
+  private platformId = inject(PLATFORM_ID);
+
   constructor() {
     const injectedConfig = inject(NGX_TOAST_ALERTS_CONFIG, { optional: true });
     if (injectedConfig) {
       this.defaultConfig = { ...this.defaultConfig, ...injectedConfig };
+    }
+    
+    if (isPlatformBrowser(this.platformId)) {
+      setTimeout(() => this.toastOverlay.createToastOverlay(), 0);
     }
 
     effect(() => {
@@ -34,6 +43,7 @@ export class NgxToastAlertsService {
         }
       }
     });
+
   }
 
   setConfig(config: Partial<NgxToastAlertsConfig>): void {
