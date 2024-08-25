@@ -1,6 +1,6 @@
 {
   "name": "ngx-toast-alerts",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "A customizable toast alerts library for Angular applications",
   "author": "Babatunde Lamidi",
   "license": "MIT",
