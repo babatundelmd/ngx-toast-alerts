@@ -27,8 +27,8 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "prepublishOnly": "ng build ngx-toast-alerts --configuration production",
-    "serve:test": "ng serve test-ngx-toast-alerts"
+    "serve:test": "ng serve test-ngx-toast-alerts",
+    "publish": "ng build ngx-toast-alerts --configuration production && cd dist/ngx-toast-alerts && npm publish"
   },
   "private": false,
   "devDependencies": {
