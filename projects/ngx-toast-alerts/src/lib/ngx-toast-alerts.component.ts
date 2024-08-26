@@ -1,5 +1,5 @@
 import { CommonModule, NgClass } from '@angular/common';
-import { ChangeDetectionStrategy, Component, HostBinding, inject, effect, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostBinding, inject } from '@angular/core';
 import { NgxToastAlertsService } from './ngx-toast-alerts.service';
 import { NgxToastAlertsConfig } from './ngx-toast-alerts-config';
 
@@ -10,7 +10,7 @@ import { NgxToastAlertsConfig } from './ngx-toast-alerts-config';
   template: `
     @if (toastService.toast(); as toast) {
       <div class="toast-container" [ngClass]="getPosition()">
-        <div class="toast" [ngClass]="toast.type" (click)="closeToast()">
+        <div class="toast" [ngClass]="toast.type" (click)="closeToast(toast.config)">
           <div class="content">
             <h3>{{ getTitle(toast.type) }}</h3>
             <p>{{ toast.message }}</p>
@@ -22,35 +22,9 @@ import { NgxToastAlertsConfig } from './ngx-toast-alerts-config';
   styleUrls: ['./ngx-toast.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class NgxToastAlertsComponent implements OnDestroy {
+export class NgxToastAlertsComponent {
   @HostBinding('attr.ng-version') version = '1'; 
   toastService = inject(NgxToastAlertsService);
-  private timeoutId: number | null = null;
-
-  constructor() {
-    effect(() => {
-      this.handleToastChange(this.toastService.toast());
-    });
-  }
-
-  private handleToastChange(toast: ReturnType<typeof this.toastService.toast>) {
-    if (this.timeoutId !== null) {
-      clearTimeout(this.timeoutId);
-      this.timeoutId = null;
-    }
-
-    if (toast && toast.config.timeout) {
-      this.timeoutId = window.setTimeout(() => {
-        this.toastService.closeToast();
-      }, toast.config.timeout);
-    }
-  }
-
-  ngOnDestroy() {
-    if (this.timeoutId !== null) {
-      clearTimeout(this.timeoutId);
-    }
-  }
 
   getTitle(type: string): string {
     switch (type) {
@@ -66,7 +40,9 @@ export class NgxToastAlertsComponent implements OnDestroy {
     return this.toastService.getPosition();
   }
 
-  closeToast() {
-    this.toastService.closeToast();
+  closeToast(config: NgxToastAlertsConfig) {
+    if (config.clickToClose) {
+      this.toastService.closeToast();
+    }
   }
 }

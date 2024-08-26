@@ -19,8 +19,7 @@ export class AppComponent implements OnInit {
 
   showSuccessToast() {
     this.toastService.success('This is a success toast!', {
-      timeout: 100000,
-      position: 'top-left'
+      clickToClose: true
     });
   }
 
