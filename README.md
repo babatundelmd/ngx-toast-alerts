@@ -2,6 +2,10 @@
 
 ngx-toast-alerts is a lightweight, customizable toast notification library for Angular 18+ applications. It provides an easy way to display success, error, info, and pending messages to users without the need to manually add components to your templates.
 
+## Demo
+
+Check out the live demo on StackBlitz: [ngx-toast-alerts Demo](https://stackblitz.com/edit/stackblitz-starters-fysgxq?file=src%2Fmain.ts)
+
 ## Features
 
 - Easy to integrate with Angular 18+ applications
@@ -14,7 +18,6 @@ ngx-toast-alerts is a lightweight, customizable toast notification library for A
 ## Installation
 
 To install ngx-toast-alerts, run the following command in your Angular project:
-
 ```bash
 npm install ngx-toast-alerts
 ```
