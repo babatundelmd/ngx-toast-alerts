@@ -37,13 +37,12 @@ export class NgxToastAlertsService {
     effect(() => {
       const currentToast = this.toast();
       if (currentToast) {
-        const timeout = currentToast.config.timeout ?? this.defaultConfig.timeout;
+        const timeout = currentToast.config.timeout;
         if (timeout && timeout > 0) {
           setTimeout(() => this.toastSignal.set(null), timeout);
         }
       }
     });
-
   }
 
   setConfig(config: Partial<NgxToastAlertsConfig>): void {
@@ -72,13 +71,14 @@ export class NgxToastAlertsService {
   }
 
   closeToast(): void {
-    const currentToast = this.toast();
-    if (currentToast && currentToast.config.clickToClose) {
-      this.toastSignal.set(null);
-    }
+    this.toastSignal.set(null);
+    // const currentToast = this.toast();
+    // if (currentToast && currentToast.config.clickToClose !== false) {
+    //   this.toastSignal.set(null);
+    // }
   }
 
   getPosition(): 'top-right' | 'top-left' | 'bottom-left' | 'bottom-right' {
-    return this.toast()?.config.position ?? this.defaultConfig.position ?? 'top-right';
+    return this.toast()?.config.position || this.defaultConfig.position || 'top-right';
   }
 }

@@ -20,7 +20,8 @@ export class ToastOverlayService {
 
     // Create the component
     this.toastComponentRef = createComponent(NgxToastAlertsComponent, {
-      environmentInjector: this.injector
+      environmentInjector: this.injector,
+      elementInjector: this.injector
     });
 
     // Attach the component to the app

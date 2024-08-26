@@ -1,6 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { NgxToastAlertsService } from '../../../ngx-toast-alerts/src/lib/ngx-toast-alerts.service';
+import { NgxToastAlertsService } from 'ngx-toast-alerts';
 
 @Component({
   selector: 'app-root',
@@ -18,7 +18,10 @@ export class AppComponent implements OnInit {
   }
 
   showSuccessToast() {
-    this.toastService.success('This is a success toast!');
+    this.toastService.success('This is a success toast!', {
+      timeout: 100000,
+      position: 'top-left'
+    });
   }
 
   showErrorToast() {
