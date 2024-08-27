@@ -32,7 +32,7 @@ bootstrapApplication(AppComponent, {
   providers: [
     provideNgxToastAlerts({
       // Optional: Provide default configuration
-      timeout: 3000,
+      timeout: 5000,
       clickToClose: false,
       position: 'top-right',
       disableTimeout: false
