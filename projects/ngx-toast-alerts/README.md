@@ -34,7 +34,8 @@ bootstrapApplication(AppComponent, {
       // Optional: Provide default configuration
       timeout: 3000,
       clickToClose: false,
-      position: 'top-right'
+      position: 'top-right',
+      disableTimeout: false
     })
   ]
 }).catch(err => console.error(err));
@@ -65,7 +66,7 @@ export class YourComponent {
   }
 
   showInfoToast() {
-    this.toast.info('Here's some information.');
+    this.toast.info('Here\'s some information.');
   }
 
   showPendingToast() {
@@ -97,7 +98,8 @@ The `ToastConfig` interface allows you to customize individual toasts:
 interface ToastConfig {
   timeout?: number;        // Duration in milliseconds before the toast disappears
   clickToClose?: boolean;  // Whether the toast can be closed by clicking
-  position?: 'top-right' | 'top-left' | 'bottom-left' | 'bottom-right';  // Position of the toast
+  position?: 'top-right' | 'top-left' | 'bottom-left' | 'bottom-right'; 
+  disableTimeout?: boolean; 
 }
 ```
 
@@ -111,7 +113,8 @@ You can provide global configuration when setting up the library in your `main.t
 provideNgxToastAlerts({
   timeout: 5000,
   clickToClose: true,
-  position: 'bottom-right'
+  position: 'bottom-right',
+  disableTimeout: false
 })
 ```
 
@@ -122,7 +125,7 @@ You can override the global configuration for individual toasts:
 ```typescript
 this.toast.success('Custom toast!', {
   timeout: 10000,
-  position: 'top-left'
+  position: 'top-left',
 });
 ```
 
@@ -133,7 +136,7 @@ ngx-toast-alerts comes with default styles, but you can customize the appearance
 ```css
 :root {
   --toast-success-bg: #4caf50;
-  --toast-success-color: #e7f6e7;
+  --toast-success-color: #e7f4e7;
   --toast-error-bg: #f44336;
   --toast-error-color: #fdecea;
   --toast-info-bg: #2196f3;
