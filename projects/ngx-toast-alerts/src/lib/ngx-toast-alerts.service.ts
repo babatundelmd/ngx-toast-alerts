@@ -4,6 +4,7 @@ import { ToastOverlayService } from './toast-overlay.service';
 import { isPlatformBrowser } from '@angular/common';
 
 export interface Toast {
+  id: number;
   type: 'success' | 'error' | 'info' | 'pending';
   message: string;
   config: NgxToastAlertsConfig;
@@ -13,14 +14,15 @@ export interface Toast {
   providedIn: 'root'
 })
 export class NgxToastAlertsService {
-  private toastSignal = signal<Toast | null>(null);
-  private timeoutId: number | null = null;
+  private toastQueue = signal<Toast[]>([]);
+  private nextId = 0;
 
-  toast = computed(() => this.toastSignal());
+  toasts = computed(() => this.toastQueue());
   private defaultConfig: NgxToastAlertsConfig = {
-    timeout: 3000,
-    clickToClose: false,
-    position: 'top-right'
+    timeout: 5000,
+    clickToClose: true,
+    position: 'top-right',
+    disableTimeout: false,
   };
 
   private toastOverlay = inject(ToastOverlayService);
@@ -58,50 +60,36 @@ export class NgxToastAlertsService {
   }
 
   private show(type: Toast['type'], message: string, config?: Partial<NgxToastAlertsConfig>): void {
-    this.clearTimeout();
     const toastConfig: NgxToastAlertsConfig = { ...this.defaultConfig, ...config };
-    const newToast: Toast = { type, message, config: toastConfig };
-    this.toastSignal.set(newToast);
+    const newToast: Toast = { id: this.nextId++, type, message, config: toastConfig };
+    
+    this.toastQueue.update(queue => [newToast, ...queue]);
 
-    if (!toastConfig.clickToClose) {
-      if (toastConfig.timeout && toastConfig.timeout > 0) {
-        this.timeoutId = window.setTimeout(() => {
-          this.closeToast();
-        }, toastConfig.timeout);
-      }
+    // Set timeout only if disableTimeout is false
+    if (!toastConfig.disableTimeout && toastConfig.timeout && toastConfig.timeout > 0) {
+      this.setAutoCloseTimeout(newToast.id, toastConfig.timeout);
     }
   }
 
-  closeToast(): void {
-    const currentToast = this.toast();
-    if (currentToast) {
-      if (currentToast.config.clickToClose) {
-        this.toastSignal.set(null);
-      } else {
-        this.toastSignal.set(null);
-      }
-      this.clearTimeout();
+  private setAutoCloseTimeout(id: number, timeout: number): void {
+    if (isPlatformBrowser(this.platformId)) {
+      const totalDuration = timeout + 300; // Add 300ms for the fadeOut animation
+      setTimeout(() => {
+        this.closeToast(id);
+      }, totalDuration);
     }
+  }
+
+  closeToast(id: number): void {
+    this.toastQueue.update(queue => queue.filter(toast => toast.id !== id));
   }
 
   getPosition(): 'top-right' | 'top-left' | 'bottom-left' | 'bottom-right' {
-    return this.toast()?.config.position || this.defaultConfig.position || 'top-right';
+    return this.defaultConfig.position || 'top-right';
   }
 
-  private clearTimeout(): void {
-    if (this.timeoutId !== null) {
-      clearTimeout(this.timeoutId);
-      this.timeoutId = null;
-    }
-  }
-
-  private shouldCloseOnClick(): boolean {
-    const currentToast = this.toast();
-    return currentToast?.config.clickToClose === true;
-  }
-
-  // This method can be used by the component to check if the toast should be closeable on click
-  isCloseableOnClick(): boolean {
-    return this.shouldCloseOnClick();
+  isCloseableOnClick(id: number): boolean {
+    const toast = this.toastQueue().find(t => t.id === id);
+    return toast?.config.clickToClose !== false; // Default to true if not specified
   }
 }

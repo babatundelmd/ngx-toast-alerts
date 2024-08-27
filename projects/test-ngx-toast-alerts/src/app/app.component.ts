@@ -2,6 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { NgxToastAlertsService } from 'ngx-toast-alerts';
 
+
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -19,7 +20,7 @@ export class AppComponent implements OnInit {
 
   showSuccessToast() {
     this.toastService.success('This is a success toast!', {
-      clickToClose: true
+      disableTimeout: true
     });
   }
 
@@ -28,10 +29,12 @@ export class AppComponent implements OnInit {
   }
 
   showInfoToast() {
-    this.toastService.info('This is an info toast!');
+    this.toastService.info('This is an info toast!'); // Uses default config
   }
 
   showPendingToast() {
-    this.toastService.pending('This is a pending toast!');
+    this.toastService.pending('This is a pending toast!', {
+      clickToClose: true,
+    });
   }
 }

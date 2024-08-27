@@ -1,6 +1,6 @@
 import { CommonModule, NgClass } from '@angular/common';
 import { ChangeDetectionStrategy, Component, HostBinding, inject } from '@angular/core';
-import { NgxToastAlertsService } from './ngx-toast-alerts.service';
+import { NgxToastAlertsService, Toast } from './ngx-toast-alerts.service';
 import { NgxToastAlertsConfig } from './ngx-toast-alerts-config';
 
 @Component({
@@ -8,16 +8,17 @@ import { NgxToastAlertsConfig } from './ngx-toast-alerts-config';
   standalone: true,
   imports: [CommonModule, NgClass],
   template: `
-    @if (toastService.toast(); as toast) {
-      <div class="toast-container" [ngClass]="getPosition()">
-        <div class="toast" [ngClass]="toast.type" (click)="closeToast(toast.config)">
+    <div class="toast-container" [ngClass]="getPosition()">
+      @for (toast of toastService.toasts(); track toast.id) {
+        <div class="toast" [ngClass]="[toast.type, getPosition()]" (click)="handleToastClick(toast)" 
+             [class.no-timeout]="toast.config.disableTimeout">
           <div class="content">
             <h3>{{ getTitle(toast.type) }}</h3>
             <p>{{ toast.message }}</p>
           </div>
         </div>
-      </div>
-    }
+      }
+    </div>
   `,
   styleUrls: ['./ngx-toast.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -40,9 +41,9 @@ export class NgxToastAlertsComponent {
     return this.toastService.getPosition();
   }
 
-  closeToast(config: NgxToastAlertsConfig) {
-    if (config.clickToClose) {
-      this.toastService.closeToast();
+  handleToastClick(toast: Toast) {
+    if (this.toastService.isCloseableOnClick(toast.id)) {
+      this.toastService.closeToast(toast.id);
     }
   }
 }

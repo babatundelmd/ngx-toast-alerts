@@ -16,8 +16,8 @@
 .toast-container {
   position: fixed;
   z-index: 1000;
-  width: 300px;
-  max-width: 100%;
+  max-width: 350px;
+  width: 100%;
   top: 20px;
   right: 20px;
 
@@ -41,7 +41,7 @@
 
 @keyframes slideInRight {
   from {
-    transform: translateX(100%);
+    transform: translateX(120%);
     opacity: 0;
   }
   to {
@@ -52,7 +52,7 @@
 
 @keyframes slideInLeft {
   from {
-    transform: translateX(-100%);
+    transform: translateX(-120%);
     opacity: 0;
   }
   to {
@@ -61,26 +61,31 @@
   }
 }
 
-@keyframes slideInTop {
+@keyframes slideOutRight {
   from {
-    transform: translateY(-100%);
-    opacity: 0;
+    transform: translateX(0);
+    opacity: 1;
   }
   to {
-    transform: translateY(0);
-    opacity: 1;
+    transform: translateX(120%);
+    opacity: 0;
   }
 }
 
-@keyframes slideInBottom {
+@keyframes slideOutLeft {
   from {
-    transform: translateY(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
+    transform: translateX(0);
     opacity: 1;
   }
+  to {
+    transform: translateX(-120%);
+    opacity: 0;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes fadeOut {
@@ -89,6 +94,7 @@
 }
 
 .toast {
+  margin-bottom: 7px;
   padding: 16px;
   border-radius: 0.5rem;
   margin-bottom: 16px;
@@ -99,7 +105,8 @@
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  animation: slideInRight 0.3s ease-out, fadeOut 0.3s ease-in 2.7s forwards;
+  animation: slideInRight 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards,
+             slideOutRight 0.5s cubic-bezier(0.55, 0.085, 0.68, 0.53) forwards 5s;
 
   &:hover {
     transform: translateY(-3px);
@@ -166,16 +173,19 @@
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23fff8e1'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z'/%3E%3C/svg%3E");
     }
   }
+
+  &.no-timeout {
+    animation: slideInRight 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  }
+
+  &.top-left, &.bottom-left {
+    animation: slideInLeft 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards,
+               slideOutLeft 0.5s cubic-bezier(0.55, 0.085, 0.68, 0.53) forwards 5s;
+
+    &.no-timeout {
+      animation: slideInLeft 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    }
+  }
 }
 
-.toast-container.top-left .toast {
-  animation: slideInLeft 0.3s ease-out, fadeOut 0.3s ease-in 2.7s forwards;
-}
-
-.toast-container.bottom-right .toast {
-  animation: slideInRight 0.3s ease-out, fadeOut 0.3s ease-in 2.7s forwards;
-}
-
-.toast-container.bottom-left .toast {
-  animation: slideInLeft 0.3s ease-out, fadeOut 0.3s ease-in 2.7s forwards;
-}
+// Remove the .toast-container animation overrides as they're no longer needed
