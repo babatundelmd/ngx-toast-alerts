@@ -35,9 +35,10 @@ bootstrapApplication(AppComponent, {
   providers: [
     provideNgxToastAlerts({
       // Optional: Provide default configuration
-      timeout: 3000,
-      clickToClose: false,
-      position: 'top-right'
+      timeout: 5000,
+      clickToClose: true,
+      position: 'top-right',
+      disableTimeout: false
     })
   ]
 }).catch(err => console.error(err));
@@ -101,6 +102,7 @@ interface ToastConfig {
   timeout?: number;        // Duration in milliseconds before the toast disappears
   clickToClose?: boolean;  // Whether the toast can be closed by clicking
   position?: 'top-right' | 'top-left' | 'bottom-left' | 'bottom-right';  // Position of the toast
+  disableTimeout?: boolean; // Whether the toast should not disappear automatically
 }
 ```
 
@@ -114,7 +116,8 @@ You can provide global configuration when setting up the library in your `main.t
 provideNgxToastAlerts({
   timeout: 5000,
   clickToClose: true,
-  position: 'bottom-right'
+  position: 'bottom-right',
+  disableTimeout: false
 })
 ```
 
