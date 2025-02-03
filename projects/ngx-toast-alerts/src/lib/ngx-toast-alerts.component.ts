@@ -4,10 +4,9 @@ import { NgxToastAlertsService, Toast } from './ngx-toast-alerts.service';
 import { NgxToastAlertsConfig } from './ngx-toast-alerts-config';
 
 @Component({
-  selector: 'ngx-toast-alerts',
-  standalone: true,
-  imports: [CommonModule, NgClass],
-  template: `
+    selector: 'ngx-toast-alerts',
+    imports: [CommonModule, NgClass],
+    template: `
     <div class="toast-container" [ngClass]="getPosition()">
       @for (toast of toastService.toasts(); track toast.id) {
         <div class="toast" [ngClass]="[toast.type, getPosition()]" (click)="handleToastClick(toast)" 
@@ -20,8 +19,8 @@ import { NgxToastAlertsConfig } from './ngx-toast-alerts-config';
       }
     </div>
   `,
-  styleUrls: ['./ngx-toast.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    styleUrls: ['./ngx-toast.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NgxToastAlertsComponent {
   @HostBinding('attr.ng-version') version = '1'; 
