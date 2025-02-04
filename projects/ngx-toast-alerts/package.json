@@ -15,8 +15,8 @@
     "notifications"
   ],
   "peerDependencies": {
-    "@angular/common": "^18.0.0",
-    "@angular/core": "^18.0.0"
+    "@angular/common": "^19.1.4",
+    "@angular/core": "^19.1.4"
   },
   "dependencies": {
     "tslib": "^2.3.0"
