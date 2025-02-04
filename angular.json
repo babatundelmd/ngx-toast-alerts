@@ -67,12 +67,7 @@
             "styles": [
               "projects/test-ngx-toast-alerts/src/styles.scss"
             ],
-            "scripts": [],
-            "server": "projects/test-ngx-toast-alerts/src/main.server.ts",
-            "prerender": true,
-            "ssr": {
-              "entry": "projects/test-ngx-toast-alerts/server.ts"
-            }
+            "scripts": []
           },
           "configurations": {
             "production": {
