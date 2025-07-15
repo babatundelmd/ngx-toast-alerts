@@ -6,7 +6,7 @@ ngx-toast-alerts is a lightweight, customizable toast notification library for A
 
 Check out the live demo on StackBlitz: [ngx-toast-alerts Demo](https://stackblitz.com/edit/stackblitz-starters-fysgxq?file=src%2Fmain.ts)
 
-<img width="362" height="79" alt="Image" src="https://github.com/user-attachments/assets/820516d8-cb23-48c8-8987-35cf98cf721a" />
+<img width="368" height="91" alt="Image" src="https://github.com/user-attachments/assets/80720b65-d8f1-45bc-ae21-0e4212c369d9" />
 
 <img width="376" height="81" alt="Image" src="https://github.com/user-attachments/assets/bba3ab58-1fe0-4dc3-bf42-1a033870cb4d" />
 
