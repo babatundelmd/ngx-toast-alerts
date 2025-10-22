@@ -1,4 +1,4 @@
-import { computed, inject, Injectable, PLATFORM_ID, signal } from '@angular/core';
+import { afterNextRender, computed, DestroyRef, inject, Injectable, Injector, PLATFORM_ID, signal } from '@angular/core';
 import { NGX_TOAST_ALERTS_CONFIG, NgxToastAlertsConfig } from './ngx-toast-alerts-config';
 import { ToastOverlayService } from './toast-overlay.service';
 import { isPlatformBrowser } from '@angular/common';
@@ -14,10 +14,12 @@ export interface Toast {
   providedIn: 'root'
 })
 export class NgxToastAlertsService {
-  private toastQueue = signal<Toast[]>([]);
+  private readonly toastQueue = signal<Toast[]>([]);
   private nextId = 0;
+  private readonly timeoutIds = new Map<number, ReturnType<typeof setTimeout>>();
 
-  toasts = computed(() => this.toastQueue());
+  readonly toasts = computed(() => this.toastQueue());
+
   private defaultConfig: NgxToastAlertsConfig = {
     timeout: 5000,
     clickToClose: true,
@@ -25,18 +27,28 @@ export class NgxToastAlertsService {
     disableTimeout: false,
   };
 
-  private toastOverlay = inject(ToastOverlayService);
-  private platformId = inject(PLATFORM_ID);
+  private readonly toastOverlay = inject(ToastOverlayService);
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly injector = inject(Injector);
 
   constructor() {
     const injectedConfig = inject(NGX_TOAST_ALERTS_CONFIG, { optional: true });
     if (injectedConfig) {
       this.defaultConfig = { ...this.defaultConfig, ...injectedConfig };
     }
-    
+
     if (isPlatformBrowser(this.platformId)) {
-      setTimeout(() => this.toastOverlay.createToastOverlay(), 0);
+      afterNextRender(() => {
+        this.toastOverlay.createToastOverlay();
+      }, { injector: this.injector });
     }
+
+    // Cleanup all timeouts on destroy
+    this.destroyRef.onDestroy(() => {
+      this.timeoutIds.forEach(timeoutId => clearTimeout(timeoutId));
+      this.timeoutIds.clear();
+    });
   }
 
   setConfig(config: Partial<NgxToastAlertsConfig>): void {
@@ -74,13 +86,22 @@ export class NgxToastAlertsService {
   private setAutoCloseTimeout(id: number, timeout: number): void {
     if (isPlatformBrowser(this.platformId)) {
       const totalDuration = timeout + 300; // Add 300ms for the fadeOut animation
-      setTimeout(() => {
+      const timeoutId = setTimeout(() => {
         this.closeToast(id);
+        this.timeoutIds.delete(id);
       }, totalDuration);
+      this.timeoutIds.set(id, timeoutId);
     }
   }
 
   closeToast(id: number): void {
+    // Clear timeout if exists
+    const timeoutId = this.timeoutIds.get(id);
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+      this.timeoutIds.delete(id);
+    }
+
     this.toastQueue.update(queue => queue.filter(toast => toast.id !== id));
   }
 

@@ -1,7 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { NgxToastAlertsService } from 'ngx-toast-alerts';
 
-
 @Component({
     selector: 'app-root',
     imports: [],
@@ -9,28 +8,28 @@ import { NgxToastAlertsService } from 'ngx-toast-alerts';
     styleUrl: './app.component.scss'
 })
 export class AppComponent implements OnInit {
-  title = 'test-ngx-toast-alerts';
-  toastService = inject(NgxToastAlertsService);
+  readonly title = 'test-ngx-toast-alerts';
+  readonly toastService = inject(NgxToastAlertsService);
 
-  ngOnInit() {
+  ngOnInit(): void {
     // Initialize any necessary setup here
   }
 
-  showSuccessToast() {
+  showSuccessToast(): void {
     this.toastService.success('This is a success toast!', {
       disableTimeout: true
     });
   }
 
-  showErrorToast() {
+  showErrorToast(): void {
     this.toastService.error('This is an error toast!');
   }
 
-  showInfoToast() {
+  showInfoToast(): void {
     this.toastService.info('This is an info toast!'); // Uses default config
   }
 
-  showPendingToast() {
+  showPendingToast(): void {
     this.toastService.pending('This is a pending toast!', {
       clickToClose: true,
     });

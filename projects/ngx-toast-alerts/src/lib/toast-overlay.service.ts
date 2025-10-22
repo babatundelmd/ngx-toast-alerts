@@ -1,15 +1,27 @@
-import { ApplicationRef, ComponentRef, createComponent, EnvironmentInjector, Injectable, inject, PLATFORM_ID } from '@angular/core';
+import { ApplicationRef, ComponentRef, createComponent, DestroyRef, EnvironmentInjector, Injectable, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { NgxToastAlertsComponent } from './ngx-toast-alerts.component';
 
-@Injectable({providedIn: 'root'})
+@Injectable({ providedIn: 'root' })
 export class ToastOverlayService {
   private toastComponentRef: ComponentRef<NgxToastAlertsComponent> | null = null;
-  private appRef = inject(ApplicationRef);
-  private injector = inject(EnvironmentInjector);
-  private platformId = inject(PLATFORM_ID);
+  private readonly appRef = inject(ApplicationRef);
+  private readonly injector = inject(EnvironmentInjector);
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly destroyRef = inject(DestroyRef);
 
-  createToastOverlay() {
+  constructor() {
+    // Cleanup component on destroy
+    this.destroyRef.onDestroy(() => {
+      if (this.toastComponentRef) {
+        this.appRef.detachView(this.toastComponentRef.hostView);
+        this.toastComponentRef.destroy();
+        this.toastComponentRef = null;
+      }
+    });
+  }
+
+  createToastOverlay(): void {
     if (!isPlatformBrowser(this.platformId)) {
       return;
     }

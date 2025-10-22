@@ -9,7 +9,7 @@ import { NgxToastAlertsConfig } from './ngx-toast-alerts-config';
     template: `
     <div class="toast-container" [ngClass]="getPosition()">
       @for (toast of toastService.toasts(); track toast.id) {
-        <div class="toast" [ngClass]="[toast.type, getPosition()]" (click)="handleToastClick(toast)" 
+        <div class="toast" [ngClass]="[toast.type, getPosition()]" (click)="handleToastClick(toast)"
              [class.no-timeout]="toast.config.disableTimeout">
           <div class="content">
             <h3>{{ getTitle(toast.type) }}</h3>
@@ -23,8 +23,8 @@ import { NgxToastAlertsConfig } from './ngx-toast-alerts-config';
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NgxToastAlertsComponent {
-  @HostBinding('attr.ng-version') version = '1'; 
-  toastService = inject(NgxToastAlertsService);
+  @HostBinding('attr.ng-version') readonly version = '2';
+  readonly toastService = inject(NgxToastAlertsService);
 
   getTitle(type: string): string {
     switch (type) {
@@ -40,7 +40,7 @@ export class NgxToastAlertsComponent {
     return this.toastService.getPosition();
   }
 
-  handleToastClick(toast: Toast) {
+  handleToastClick(toast: Toast): void {
     if (this.toastService.isCloseableOnClick(toast.id)) {
       this.toastService.closeToast(toast.id);
     }

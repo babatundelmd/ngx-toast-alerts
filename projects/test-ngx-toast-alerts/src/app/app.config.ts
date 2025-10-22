@@ -1,10 +1,14 @@
 import { ApplicationConfig } from '@angular/core';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { NgxToastAlertsService } from 'ngx-toast-alerts';
+import { provideNgxToastAlerts } from 'ngx-toast-alerts';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    NgxToastAlertsService,
+    provideNgxToastAlerts({
+      timeout: 5000,
+      position: 'top-right',
+      clickToClose: true
+    }),
     provideAnimations()
   ]
 };
