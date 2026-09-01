@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
 
@@ -10,20 +11,18 @@ describe('AppComponent', () => {
 
   it('should create the app', () => {
     const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.componentInstance;
-    expect(app).toBeTruthy();
+    expect(fixture.componentInstance).toBeTruthy();
   });
 
-  it(`should have the 'test-ngx-toast-alerts' title`, () => {
+  it('should render the hero heading', async () => {
     const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.componentInstance;
-    expect(app.title).toEqual('test-ngx-toast-alerts');
-  });
-
-  it('should render title', () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    fixture.detectChanges();
+    await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, test-ngx-toast-alerts');
+    expect(compiled.querySelector('h1')?.textContent).toContain('Rounded toasts');
+  });
+
+  it('should default to the top-right position', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    expect(fixture.componentInstance.position()).toBe('top-right');
   });
 });

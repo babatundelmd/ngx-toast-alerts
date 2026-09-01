@@ -1,5 +1,72 @@
-<h1>Test NgxToastAlerts</h1>
-<button (click)="showSuccessToast()">Success Toast</button>
-<button (click)="showErrorToast()">Error Toast</button>
-<button (click)="showInfoToast()">Info Toast</button>
-<button (click)="showPendingToast()">Pending Toast</button>
+<main class="page">
+  <header class="hero">
+    <p class="eyebrow">ngx-toast-alerts v3</p>
+    <h1>Rounded toasts for Angular 22</h1>
+    <p class="lede">
+      Signal-driven, zoneless, SSR-safe. Six edge positions plus a centred toast
+      that springs out of a blur.
+    </p>
+  </header>
+
+  <section class="panel">
+    <h2>Position</h2>
+    <div class="chips">
+      @for (option of positions; track option) {
+        <button
+          type="button"
+          class="chip"
+          [class.is-active]="position() === option"
+          (click)="setPosition(option)"
+        >
+          {{ option }}
+        </button>
+      }
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Corner radius</h2>
+    <div class="chips">
+      @for (option of radii; track option) {
+        <button
+          type="button"
+          class="chip"
+          [class.is-active]="radius() === option"
+          (click)="setRadius(option)"
+        >
+          {{ option }}
+        </button>
+      }
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Types</h2>
+    <div class="chips">
+      @for (type of types; track type) {
+        <button type="button" class="btn" [attr.data-type]="type" (click)="show(type)">
+          {{ type }}
+        </button>
+      }
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Showcase</h2>
+    <div class="chips">
+      <button type="button" class="btn btn--primary" (click)="showCenter()">
+        Centred toast
+      </button>
+      <button type="button" class="btn" (click)="showCenterPersistent()">
+        Centred, no timeout
+      </button>
+      <button type="button" class="btn" (click)="showProgress()">
+        With progress bar
+      </button>
+      <button type="button" class="btn" (click)="showStack()">Stack of five</button>
+      <button type="button" class="btn btn--ghost" (click)="dismissAll()">
+        Dismiss all
+      </button>
+    </div>
+  </section>
+</main>

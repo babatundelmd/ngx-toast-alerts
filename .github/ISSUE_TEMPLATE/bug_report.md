@@ -1,32 +1,45 @@
 ---
 name: Bug report
-about: Create a report to help us improve
+about: Something is not working the way it should
 title: ''
-labels: ''
+labels: bug
 assignees: ''
-
 ---
 
 **Describe the bug**
-A clear and concise description of what the bug is.
+A clear and concise description of what goes wrong.
 
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+**To reproduce**
+Steps to reproduce the behaviour. A minimal StackBlitz or repository is by far
+the fastest route to a fix.
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
+1. Configure the library with '...'
+2. Call `toast.<method>('...')` with '...'
+3. See '...'
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
+**Expected behaviour**
+What you expected to happen instead.
 
-**Desktop (please complete the following information):**
- - OS: [e.g. iOS]
- - Browser [e.g. chrome, safari]
- - Version [e.g. 22]
+**Screenshots or recording**
+For anything visual — position, animation, theming — a screenshot or short
+recording helps a lot.
+
+**Environment**
+
+- ngx-toast-alerts version: [e.g. 3.0.0]
+- Angular version: [e.g. 22.1.4]
+- Zoneless or zone.js: [e.g. zoneless]
+- SSR: [yes / no]
+- Browser and OS: [e.g. Chrome 140 on macOS 15]
+
+**Configuration**
+
+```ts
+provideNgxToastAlerts({
+  // the config you are using
+});
+```
 
 **Additional context**
-Add any other context about the problem here.
+Anything else worth knowing — console errors, related issues, workarounds you
+have tried.

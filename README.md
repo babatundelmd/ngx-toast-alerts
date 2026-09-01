@@ -1,176 +1,324 @@
 # ngx-toast-alerts
 
-ngx-toast-alerts is a lightweight, customizable toast notification library for Angular 18+ applications. It provides an easy way to display success, error, info, and pending messages to users without the need to manually add components to your templates.
+Rounded, animated toast notifications for Angular — including a centred toast
+that springs out of a blur.
 
-## Demo
+[![npm](https://img.shields.io/npm/v/ngx-toast-alerts.svg)](https://www.npmjs.com/package/ngx-toast-alerts)
+[![downloads](https://img.shields.io/npm/dm/ngx-toast-alerts.svg)](https://www.npmjs.com/package/ngx-toast-alerts)
+[![license](https://img.shields.io/npm/l/ngx-toast-alerts.svg)](LICENSE)
 
-Check out the live demo on StackBlitz: [ngx-toast-alerts Demo](https://stackblitz.com/edit/stackblitz-starters-fysgxq?file=src%2Fmain.ts)
+No template wiring, no module imports, no web fonts. Inject the service and call
+a method — the library mounts its own overlay the first time you use it.
 
-<img width="368" height="91" alt="Image" src="https://github.com/user-attachments/assets/80720b65-d8f1-45bc-ae21-0e4212c369d9" />
+```ts
+private toast = inject(NgxToastAlertsService);
 
-<img width="376" height="81" alt="Image" src="https://github.com/user-attachments/assets/bba3ab58-1fe0-4dc3-bf42-1a033870cb4d" />
+this.toast.success('Your changes have been saved');
+this.toast.center('Read the full tutorial', 'pending', { title: 'Notifications UI' });
+```
 
-<img width="365" height="91" alt="Image" src="https://github.com/user-attachments/assets/74f41649-3103-4e45-bf15-6f91048d19c9" />
+## Contents
 
-<img width="365" height="91" alt="Image" src="https://github.com/user-attachments/assets/52931e49-7197-4723-9353-15c55174f751" />
+- [Features](#features)
+- [Installation](#installation)
+- [Setup](#setup)
+- [Usage](#usage)
+- [Positions](#positions)
+- [Configuration](#configuration)
+- [Styling](#styling)
+- [Accessibility](#accessibility)
+- [Server-side rendering](#server-side-rendering)
+- [Compatibility](#compatibility)
+- [Contributing](#contributing)
 
 ## Features
 
-- Easy to integrate with Angular 18+ applications
-- Supports success, error, info, and pending toast types
-- Customizable appearance and behavior
-- Automatically creates toast overlay without manual template additions
-- Compatible with server-side rendering (SSR)
-- Uses Angular's latest features including standalone components and `inject` function
+- **Seven positions**, including a centred toast with a dimmed, blurred backdrop.
+- **Rounded by design** — `soft`, `round` and `pill` corner presets.
+- **Five types**: success, error, warning, info and pending.
+- **Signal-driven and zoneless-ready.** No `zone.js` requirement, no
+  `provideAnimations()`.
+- **SSR-safe.** The overlay is only created in the browser.
+- **Themeable** through CSS custom properties, with dark mode out of the box.
+- **Accessible** — live-region announcements, a labelled close button, keyboard
+  focus styles, and a `prefers-reduced-motion` path.
+- **Zero runtime dependencies** beyond `tslib`. No web fonts are fetched.
 
 ## Installation
 
-To install ngx-toast-alerts, run the following command in your Angular project:
 ```bash
 npm install ngx-toast-alerts
 ```
 
 ## Setup
 
-1. In your `main.ts` file, import and provide the ngx-toast-alerts configuration:
+**There is none.** The service is `providedIn: 'root'` and mounts its own
+overlay into `<body>` the first time you show a toast. After installing, this is
+a complete, working integration:
 
-```typescript
-import { bootstrapApplication } from '@angular/platform-browser';
-import { AppComponent } from './app/app.component';
-import { provideNgxToastAlerts } from 'ngx-toast-alerts';
-
-bootstrapApplication(AppComponent, {
-  providers: [
-    provideNgxToastAlerts({
-      // Optional: Provide default configuration
-      timeout: 5000,
-      clickToClose: true,
-      position: 'top-right',
-      disableTimeout: false
-    })
-  ]
-}).catch(err => console.error(err));
-```
-
-## Usage
-
-To use ngx-toast-alerts in your components:
-
-1. Import the `NgxToastAlertsService` in your component:
-
-```typescript
+```ts
 import { Component, inject } from '@angular/core';
 import { NgxToastAlertsService } from 'ngx-toast-alerts';
 
 @Component({
-  // ...
+  selector: 'app-root',
+  template: `<button (click)="save()">Save</button>`,
 })
+export class AppComponent {
+  private toast = inject(NgxToastAlertsService);
+
+  save() {
+    this.toast.success('Your changes have been saved');
+  }
+}
+```
+
+No module to import, no provider to register, no `<ngx-toast-alerts>` element to
+place in a template, and no stylesheet to add to `angular.json` — the styles are
+bundled with the component.
+
+### Changing the defaults
+
+Optionally, register `provideNgxToastAlerts()` at bootstrap to set defaults for
+the whole application:
+
+```ts
+import { bootstrapApplication } from '@angular/platform-browser';
+import { provideNgxToastAlerts } from 'ngx-toast-alerts';
+import { AppComponent } from './app/app.component';
+
+bootstrapApplication(AppComponent, {
+  providers: [
+    provideNgxToastAlerts({
+      timeout: 5000,
+      position: 'top-right',
+      radius: 'round',
+    }),
+  ],
+}).catch((err) => console.error(err));
+```
+
+It returns `EnvironmentProviders`, so pass it directly rather than spreading it.
+You can also change the defaults at runtime with `toast.setConfig({ ... })`, or
+override any option on a single toast.
+
+### Using an `NgModule` app
+
+The library ships standalone components, but nothing here requires a standalone
+app. Register the defaults in your root module and inject the service exactly
+the same way:
+
+```ts
+@NgModule({
+  providers: [provideNgxToastAlerts({ position: 'center' })],
+})
+export class AppModule {}
+```
+
+## Usage
+
+Inject `NgxToastAlertsService` and call one of the type methods. Each returns the
+new toast's id.
+
+```ts
+import { Component, inject } from '@angular/core';
+import { NgxToastAlertsService } from 'ngx-toast-alerts';
+
+@Component({ /* ... */ })
 export class YourComponent {
   private toast = inject(NgxToastAlertsService);
 
-  showSuccessToast() {
-    this.toast.success('Operation completed successfully!');
+  save() {
+    this.toast.success('Your changes have been saved');
   }
 
-  showErrorToast() {
-    this.toast.error('An error occurred.');
+  fail() {
+    this.toast.error('We could not reach the server', { timeout: 8000 });
   }
 
-  showInfoToast() {
-    this.toast.info('Here's some information.');
-  }
+  upload() {
+    const id = this.toast.pending('Uploading three files…', {
+      disableTimeout: true,
+    });
 
-  showPendingToast() {
-    this.toast.pending('Operation in progress...');
+    this.uploads.done.subscribe(() => {
+      this.toast.closeToast(id);
+      this.toast.success('Upload complete');
+    });
   }
 }
 ```
 
-2. Use the injected service to show toasts in your component methods.
+### The centred toast
 
-## API
+`center()` anchors the toast to the middle of the viewport, dims and blurs the
+page behind it, and animates it in with a spring.
 
-### NgxToastAlertsService
-
-The `NgxToastAlertsService` provides the following methods:
-
-- `success(message: string, config?: Partial<ToastConfig>)`: Display a success toast
-- `error(message: string, config?: Partial<ToastConfig>)`: Display an error toast
-- `info(message: string, config?: Partial<ToastConfig>)`: Display an info toast
-- `pending(message: string, config?: Partial<ToastConfig>)`: Display a pending toast
-
-Each method accepts a message string and an optional configuration object.
-
-### ToastConfig
-
-The `ToastConfig` interface allows you to customize individual toasts:
-
-```typescript
-interface ToastConfig {
-  timeout?: number;        // Duration in milliseconds before the toast disappears
-  clickToClose?: boolean;  // Whether the toast can be closed by clicking
-  position?: 'top-right' | 'top-left' | 'bottom-left' | 'bottom-right';  // Position of the toast
-  disableTimeout?: boolean; // Whether the toast should not disappear automatically
-}
-```
-
-## Customization
-
-### Global Configuration
-
-You can provide global configuration when setting up the library in your `main.ts`:
-
-```typescript
-provideNgxToastAlerts({
-  timeout: 5000,
-  clickToClose: true,
-  position: 'bottom-right',
-  disableTimeout: false
-})
-```
-
-### Per-Toast Configuration
-
-You can override the global configuration for individual toasts:
-
-```typescript
-this.toast.success('Custom toast!', {
-  timeout: 10000,
-  position: 'top-left'
+```ts
+this.toast.center('Read the full tutorial to enhance your skills', 'pending', {
+  title: 'Notifications UI design',
 });
+
+// Equivalent to:
+this.toast.show('pending', '…', { position: 'center' });
 ```
+
+Clicking the backdrop dismisses the toast unless `clickToClose: false` is set.
+Pass `backdrop: false` for a centred toast with no dimming.
+
+### Service API
+
+| Member | Description |
+| --- | --- |
+| `success(message, config?)` | Green toast. Returns the toast id. |
+| `error(message, config?)` | Red toast. |
+| `warning(message, config?)` | Orange toast. |
+| `info(message, config?)` | Neutral toast. |
+| `pending(message, config?)` | Indigo toast with a spinner. |
+| `center(message, type?, config?)` | Any type, pinned to the centre. |
+| `show(type, message, config?)` | General entry point. |
+| `closeToast(id)` | Animate one toast out and remove it. |
+| `dismissAll()` | Dismiss every live toast. |
+| `pauseToast(id)` / `resumeToast(id)` | Freeze and resume a dismiss timer. |
+| `setConfig(config)` | Merge new defaults, for toasts shown afterwards. |
+| `toasts` | Signal of the live toasts, newest first. |
+| `toastsByPosition` | Signal of the live toasts grouped by position. |
+
+## Positions
+
+`top-left` · `top-center` · `top-right` · `bottom-left` · `bottom-center` ·
+`bottom-right` · `center`
+
+Position can be set globally or per toast — the two mix freely, and each
+position gets its own stack with an entrance and exit animation to match.
+
+```ts
+this.toast.info('Global position');
+this.toast.info('Bottom left, just this once', { position: 'bottom-left' });
+```
+
+## Configuration
+
+Every option can be set globally in `provideNgxToastAlerts()` or overridden on a
+single toast.
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `timeout` | `number` | `5000` | Milliseconds before auto-dismiss. |
+| `disableTimeout` | `boolean` | `false` | Keep the toast until dismissed explicitly. |
+| `clickToClose` | `boolean` | `true` | Dismiss when the toast body is clicked. |
+| `position` | `NgxToastPosition` | `'top-right'` | Where the toast is anchored. |
+| `radius` | `'soft' \| 'round' \| 'pill'` | `'round'` | Corner rounding preset. |
+| `showCloseButton` | `boolean` | `true` | Render the × button. |
+| `pauseOnHover` | `boolean` | `true` | Freeze the timer while hovered. |
+| `showProgress` | `boolean` | `false` | Draw a countdown bar. |
+| `backdrop` | `boolean` | `true` | Dim the page behind a `center` toast. |
+| `maxToasts` | `number` | `5` | Cap per position; oldest are dropped. |
+| `title` | `string` | per type | Override the heading. |
+| `ariaLive` | `'polite' \| 'assertive'` | `'polite'` | Announcement politeness. |
 
 ## Styling
 
-ngx-toast-alerts comes with default styles, but you can customize the appearance by overriding CSS variables in your global styles:
+The library ships one stylesheet driven entirely by custom properties. Set any
+of them anywhere above the toast in the tree — `:root` is the usual place — and
+it wins. No `::ng-deep`, no `!important`, no stylesheet to register.
 
 ```css
 :root {
-  --toast-success-bg: #4caf50;
-  --toast-success-color: #e7f6e7;
-  --toast-error-bg: #f44336;
-  --toast-error-color: #fdecea;
-  --toast-info-bg: #2196f3;
-  --toast-info-color: #e8f4fd;
-  --toast-pending-bg: #ffc107;
-  --toast-pending-color: #fff8e1;
-  --toast-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  --toast-font-family: 'Inter', sans-serif;
+  /* Surface */
+  --ngx-toast-surface: #ffffff;
+  --ngx-toast-title-color: #0d1117;
+  --ngx-toast-message-color: #6b7280;
+
+  /* Shape */
+  --ngx-toast-radius: 20px;
+  --ngx-toast-icon-radius: 14px;
+  --ngx-toast-icon-size: 44px;
+  --ngx-toast-width: 400px;
+  --ngx-toast-offset: 24px;
+
+  /* Type accents */
+  --ngx-toast-success: #34c88a;
+  --ngx-toast-error: #e0796d;
+  --ngx-toast-warning: #efb265;
+  --ngx-toast-info: #9aa2ae;
+  --ngx-toast-pending: #8fa2f5;
+
+  /* Motion */
+  --ngx-toast-enter-duration: 460ms;
+  --ngx-toast-exit-duration: 260ms;
+
+  --ngx-toast-font: 'Inter', system-ui, sans-serif;
+  --ngx-toast-z-index: 9999;
 }
 ```
 
-## Server-Side Rendering (SSR)
+The full set also covers the shadow, the backdrop colour and blur, the easing
+curves, and the close button colours — see
+[`ngx-toast.component.scss`](projects/ngx-toast-alerts/src/lib/ngx-toast.component.scss).
 
-ngx-toast-alerts is compatible with server-side rendering. The library automatically detects the platform and only creates the toast overlay in browser environments.
+Every value above is a *default*, not a declaration: internally the library
+reads `var(--ngx-toast-radius, 20px)` and never declares `--ngx-toast-radius`
+itself. That is what lets a `:root` rule beat it — a token declared on the
+component host would outrank both `:root` and an `ngx-toast-alerts` selector.
 
-## Browser Support
+Dark mode is applied automatically from `prefers-color-scheme`. Setting a
+surface token yourself pins that value in **both** themes, which is the point —
+you have opted out of the automatic switch. To theme each mode separately, wrap
+your overrides in your own media query:
 
-ngx-toast-alerts supports all modern browsers. For older browsers, please ensure you have the necessary polyfills in place.
+```css
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ngx-toast-surface: #101418;
+  }
+}
+```
+
+> **Changing the exit duration?** `--ngx-toast-exit-duration` only affects the
+> animation. The service waits a fixed 260ms before removing the element, so a
+> longer exit animation will be cut short.
+
+## Accessibility
+
+- Toasts are announced through live regions that are present in the DOM before
+  any toast is inserted, so they are reliably read out.
+- `ariaLive: 'assertive'` interrupts; the default `'polite'` waits.
+- The close button carries an accessible label and a visible focus ring.
+- Under `prefers-reduced-motion: reduce`, entrance and exit animations are
+  reduced to a fade and the hover lift is dropped.
+
+## Server-side rendering
+
+The library is SSR-safe. `ToastOverlayService` checks the platform and only
+mounts the overlay in the browser, and dismiss timers never start on the server.
+No extra configuration is required.
+
+## Compatibility
+
+| ngx-toast-alerts | Angular |
+| --- | --- |
+| 3.x | 22 |
+| 2.x | 18 – 19 |
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) and the
+[Code of Conduct](CODE_OF_CONDUCT.md).
+
+```bash
+git clone https://github.com/babatundelmd/ngx-toast-alerts.git
+cd ngx-toast-alerts
+npm install
+
+npm run build     # build the library
+npm test          # run the library tests
+npm start         # serve the demo app on :4200
+```
+
+The demo app under `projects/test-ngx-toast-alerts` exercises every position,
+radius and type — it is the fastest way to see a change.
 
 ## License
 
-This project is licensed under the MIT License.
+[MIT](LICENSE) © Babatunde Lamidi

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question or usage help
+    url: https://github.com/babatundelmd/ngx-toast-alerts/discussions
+    about: Ask how to do something, or share what you built. Please don't open an issue for questions.
+  - name: Report a security vulnerability
+    url: https://github.com/babatundelmd/ngx-toast-alerts/security/advisories/new
+    about: Report privately through a security advisory, not a public issue.

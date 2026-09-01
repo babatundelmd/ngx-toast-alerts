@@ -1,7 +1,7 @@
 {
   "name": "ngx-toast-alerts",
-  "version": "2.0.8",
-  "description": "A customizable toast alerts library for Angular applications",
+  "version": "3.0.0",
+  "description": "A rounded, animated toast notification library for Angular — including a centred, spring-animated toast.",
   "author": "Babatunde Lamidi",
   "license": "MIT",
   "repository": {
@@ -12,14 +12,22 @@
     "angular",
     "toast",
     "alerts",
-    "notifications"
+    "notifications",
+    "snackbar",
+    "signals",
+    "zoneless",
+    "ssr"
   ],
   "peerDependencies": {
-    "@angular/common": "^19.1.4",
-    "@angular/core": "^19.1.4"
+    "@angular/common": "^22.0.0",
+    "@angular/core": "^22.0.0"
   },
   "dependencies": {
     "tslib": "^2.3.0"
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "homepage": "https://github.com/babatundelmd/ngx-toast-alerts#readme",
+  "bugs": {
+    "url": "https://github.com/babatundelmd/ngx-toast-alerts/issues"
+  }
 }

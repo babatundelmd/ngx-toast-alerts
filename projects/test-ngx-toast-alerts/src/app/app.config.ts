@@ -1,10 +1,19 @@
-import { ApplicationConfig } from '@angular/core';
-import { provideAnimations } from '@angular/platform-browser/animations';
-import { NgxToastAlertsService } from 'ngx-toast-alerts';
+import {
+  ApplicationConfig,
+  provideBrowserGlobalErrorListeners,
+  provideZonelessChangeDetection,
+} from '@angular/core';
+import { provideNgxToastAlerts } from 'ngx-toast-alerts';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    NgxToastAlertsService,
-    provideAnimations()
-  ]
+    provideBrowserGlobalErrorListeners(),
+    // The library is signal-driven, so it needs no zone.js.
+    provideZonelessChangeDetection(),
+    provideNgxToastAlerts({
+      timeout: 5000,
+      position: 'top-right',
+      radius: 'round',
+    }),
+  ],
 };
