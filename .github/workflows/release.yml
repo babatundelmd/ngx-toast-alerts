@@ -74,6 +74,15 @@ jobs:
             echo "ngx-toast-alerts@${VERSION} is new — releasing."
           fi
 
+      - name: Build the release notes from the changelog
+        if: steps.published.outputs.already == 'false'
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          node scripts/release-notes.mjs "${VERSION}" > "${RUNNER_TEMP}/release-notes.md"
+          echo "Release notes:"
+          cat "${RUNNER_TEMP}/release-notes.md"
+
       - name: Build the publishable package
         if: steps.published.outputs.already == 'false'
         run: npm run prepack:lib
@@ -105,7 +114,7 @@ jobs:
         run: |
           gh release create "v${VERSION}" \
             --title "v${VERSION}" \
-            --generate-notes \
+            --notes-file "${RUNNER_TEMP}/release-notes.md" \
             --verify-tag
 
       - name: Summary

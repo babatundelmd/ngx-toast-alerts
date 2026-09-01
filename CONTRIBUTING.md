@@ -185,6 +185,16 @@ Open a release PR that:
    (`npm run lint:versions`).
 2. Moves the `## [Unreleased]` entries under a new version heading in
    [CHANGELOG.md](CHANGELOG.md), and updates the comparison links at the bottom.
+   **This is required, not optional** — the GitHub Release notes are generated
+   from that section, and the release fails before publishing if it is missing.
+   Preview exactly what will be posted with:
+
+   ```bash
+   npm run release:notes 3.1.0
+   ```
+
+   A `### Migration` subsection in the entry adds a breaking-change callout to
+   the release page, so include one whenever consumers need to do something.
 
 When that PR merges, `.github/workflows/release.yml` runs the full CI suite —
 build and test on Node 22/24 (and 26 advisory), Playwright, and the pack-and-install
@@ -192,7 +202,8 @@ verification — and then, **only if that version is not already on npm**:
 
 - publishes with `--provenance`, so the tarball is cryptographically linked to
   the workflow run and commit that produced it;
-- tags `vX.Y.Z` and opens a GitHub Release.
+- tags `vX.Y.Z` and opens a GitHub Release whose notes are built from the
+  changelog entry — not from commit titles.
 
 A merge that does not change the version is a no-op: the checks run, the publish
 step is skipped, and the job summary says why. That is deliberate — publishing on

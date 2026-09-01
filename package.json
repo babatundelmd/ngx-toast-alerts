@@ -32,6 +32,7 @@
     "e2e:report": "playwright show-report",
     "lint:tokens": "node scripts/check-style-tokens.mjs",
     "lint:versions": "node scripts/check-versions.mjs",
+    "release:notes": "node scripts/release-notes.mjs",
     "typecheck": "npm run build && tsc --noEmit -p tsconfig.json",
     "serve:test": "npm start",
     "prepack:lib": "ng build ngx-toast-alerts --configuration production && cp LICENSE CHANGELOG.md dist/ngx-toast-alerts/",
