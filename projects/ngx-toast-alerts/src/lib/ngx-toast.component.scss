@@ -1,191 +1,604 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+// ngx-toast-alerts — visual layer.
+//
+// Theming contract: the library NEVER declares a `--ngx-toast-*` property. It
+// only ever *reads* one, with a fallback, into a private `--_*` token:
+//
+//     --_radius: var(--ngx-toast-radius, 20px);
+//
+// That matters because `:host` compiles to an attribute selector with higher
+// specificity than a consumer's `ngx-toast-alerts { … }` rule, and a value
+// declared on the host also beats one inherited from `:root`. Declaring the
+// public tokens here would silently override every consumer's theme. Reading
+// them instead means a consumer can set them anywhere up the tree — `:root`,
+// `body`, or the host element — and always win.
+//
+// No web fonts are fetched: the default stack is the host platform's UI font.
 
 :host {
-  --toast-success-bg: #4caf50;
-  --toast-success-color: #e7f6e7;
-  --toast-error-bg: #f44336;
-  --toast-error-color: #fdecea;
-  --toast-info-bg: #2196f3;
-  --toast-info-color: #e8f4fd;
-  --toast-pending-bg: #ffc107;
-  --toast-pending-color: #fff8e1;
-  --toast-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  --toast-font-family: 'Inter', sans-serif;
+  // Surface
+  --_surface: var(--ngx-toast-surface, #ffffff);
+  --_title: var(--ngx-toast-title-color, #0d1117);
+  --_message: var(--ngx-toast-message-color, #6b7280);
+  --_close: var(--ngx-toast-close-color, #9aa1ad);
+  --_close-hover-bg: var(--ngx-toast-close-hover-bg, rgba(13, 17, 23, 0.06));
+
+  // Shape
+  --_radius: var(--ngx-toast-radius, 20px);
+  --_icon-radius: var(--ngx-toast-icon-radius, 14px);
+  --_icon-size: var(--ngx-toast-icon-size, 44px);
+  --_width: var(--ngx-toast-width, 400px);
+  --_gap: var(--ngx-toast-gap, 14px);
+  --_offset: var(--ngx-toast-offset, 24px);
+  --_padding: var(--ngx-toast-padding, 14px 16px);
+
+  // Type accents
+  --_success: var(--ngx-toast-success, #34c88a);
+  --_error: var(--ngx-toast-error, #e0796d);
+  --_warning: var(--ngx-toast-warning, #efb265);
+  --_info: var(--ngx-toast-info, #9aa2ae);
+  --_pending: var(--ngx-toast-pending, #8fa2f5);
+  --_glyph: var(--ngx-toast-icon-glyph, #ffffff);
+
+  // Depth
+  --_shadow: var(
+    --ngx-toast-shadow,
+    0 1px 2px rgba(13, 17, 23, 0.04) , 0 12px 32px -12px rgba(13, 17, 23, 0.16)
+  );
+  --_glow: var(--ngx-toast-glow-strength, 55%);
+
+  // Backdrop behind centred toasts
+  --_backdrop: var(--ngx-toast-backdrop-color, rgba(13, 17, 23, 0.32));
+  --_backdrop-blur: var(--ngx-toast-backdrop-blur, 3px);
+
+  // Motion
+  --_enter: var(--ngx-toast-enter-duration, 460ms);
+  --_exit: var(--ngx-toast-exit-duration, 260ms);
+  --_spring: var(--ngx-toast-spring, cubic-bezier(0.22, 1.15, 0.36, 1));
+  --_ease: var(--ngx-toast-ease-out, cubic-bezier(0.4, 0, 0.2, 1));
+
+  --_z: var(--ngx-toast-z-index, 9999);
+  --_font: var(
+    --ngx-toast-font,
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    'Helvetica Neue',
+    Arial,
+    sans-serif
+  );
+
+  display: block;
 }
 
-.toast-container {
+// Dark defaults. A consumer who sets the public token pins that value in both
+// themes, which is the point — they have opted out of the automatic switch.
+@media (prefers-color-scheme: dark) {
+  :host {
+    --_surface: var(--ngx-toast-surface, #171a21);
+    --_title: var(--ngx-toast-title-color, #f3f5f8);
+    --_message: var(--ngx-toast-message-color, #9aa3b2);
+    --_close: var(--ngx-toast-close-color, #7d8797);
+    --_close-hover-bg: var(--ngx-toast-close-hover-bg, rgba(255, 255, 255, 0.08));
+    --_shadow: var(
+      --ngx-toast-shadow,
+      0 1px 2px rgba(0, 0, 0, 0.4) , 0 12px 32px -12px rgba(0, 0, 0, 0.6)
+    );
+    --_backdrop: var(--ngx-toast-backdrop-color, rgba(0, 0, 0, 0.5));
+  }
+}
+
+// Screen-reader-only announcement regions.
+.ngx-toast-live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.ngx-toast-backdrop {
   position: fixed;
-  z-index: 1000;
-  max-width: 350px;
-  width: 100%;
-  top: 20px;
-  right: 20px;
-
-  &.top-left {
-    left: 20px;
-    right: auto;
-  }
-
-  &.bottom-right {
-    bottom: 20px;
-    top: auto;
-  }
-
-  &.bottom-left {
-    bottom: 20px;
-    left: 20px;
-    top: auto;
-    right: auto;
-  }
+  inset: 0;
+  z-index: calc(var(--_z) - 1);
+  background: var(--_backdrop);
+  backdrop-filter: blur(var(--_backdrop-blur));
+  -webkit-backdrop-filter: blur(var(--_backdrop-blur));
+  animation: ngx-toast-backdrop-in var(--_exit) var(--_ease) both;
 }
 
-@keyframes slideInRight {
-  from {
-    transform: translateX(120%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
+// ---------------------------------------------------------------------------
+// Containers — one fixed stack per position in use.
+// ---------------------------------------------------------------------------
 
-@keyframes slideInLeft {
-  from {
-    transform: translateX(-120%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-@keyframes slideOutRight {
-  from {
-    transform: translateX(0);
-    opacity: 1;
-  }
-  to {
-    transform: translateX(120%);
-    opacity: 0;
-  }
-}
-
-@keyframes slideOutLeft {
-  from {
-    transform: translateX(0);
-    opacity: 1;
-  }
-  to {
-    transform: translateX(-120%);
-    opacity: 0;
-  }
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes fadeOut {
-  from { opacity: 1; }
-  to { opacity: 0; }
-}
-
-.toast {
-  margin-bottom: 7px;
-  padding: 16px;
-  border-radius: 0.5rem;
-  margin-bottom: 16px;
-  font-family: var(--toast-font-family);
-  color: #fff;
-  box-shadow: var(--toast-shadow);
-  transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
+.ngx-toast-container {
+  position: fixed;
+  z-index: var(--_z);
   display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  animation: slideInRight 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards,
-             slideOutRight 0.5s cubic-bezier(0.55, 0.085, 0.68, 0.53) forwards 5s;
+  flex-direction: column;
+  gap: var(--_gap);
+  width: min(var(--_width), calc(100vw - var(--_offset) * 2));
+  // The stack itself must never swallow clicks meant for the page beneath it.
+  pointer-events: none;
+
+  &[data-position='top-right'] {
+    top: var(--_offset);
+    right: var(--_offset);
+  }
+
+  &[data-position='top-left'] {
+    top: var(--_offset);
+    left: var(--_offset);
+  }
+
+  &[data-position='top-center'] {
+    top: var(--_offset);
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  &[data-position='bottom-right'] {
+    right: var(--_offset);
+    bottom: var(--_offset);
+    flex-direction: column-reverse;
+  }
+
+  &[data-position='bottom-left'] {
+    bottom: var(--_offset);
+    left: var(--_offset);
+    flex-direction: column-reverse;
+  }
+
+  &[data-position='bottom-center'] {
+    bottom: var(--_offset);
+    left: 50%;
+    transform: translateX(-50%);
+    flex-direction: column-reverse;
+  }
+
+  // The centred stack spans the viewport and centres its children, so the
+  // toast can animate purely on scale/blur without fighting a transform offset.
+  &[data-position='center'] {
+    inset: 0;
+    width: auto;
+    align-items: center;
+    justify-content: center;
+    padding: var(--_offset);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// The toast card.
+// ---------------------------------------------------------------------------
+
+.ngx-toast {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-sizing: border-box;
+  width: 100%;
+  padding: var(--_padding);
+  overflow: hidden;
+  pointer-events: auto;
+  font-family: var(--_font);
+  background: var(--_surface);
+  border-radius: var(--_radius);
+  box-shadow: var(--_shadow),
+    0 16px 36px -16px color-mix(in srgb, var(--_accent) var(--_glow), transparent);
+  transition:
+    transform 220ms var(--_ease),
+    box-shadow 220ms var(--_ease);
+  animation: ngx-toast-in var(--_enter) var(--_spring) both;
+
+  &.is-clickable {
+    cursor: pointer;
+  }
 
   &:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+    box-shadow: var(--_shadow),
+      0 22px 44px -16px color-mix(in srgb, var(--_accent) 70%, transparent);
   }
 
-  .content {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-
-    h3 {
-      margin: 0;
-      font-weight: 600;
-      font-size: 16px;
-    }
-
-    p {
-      margin: 4px 0 0;
-      font-size: 14px;
-      line-height: 1.4;
-    }
+  // --- Shape presets -------------------------------------------------------
+  // Each preset is only a fallback: an explicit --ngx-toast-radius still wins.
+  &[data-radius='soft'] {
+    --_radius: var(--ngx-toast-radius, 12px);
+    --_icon-radius: var(--ngx-toast-icon-radius, 10px);
   }
 
-  &::before {
-    content: '';
-    flex-shrink: 0;
-    display: inline-block;
-    width: 24px;
-    height: 24px;
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
+  &[data-radius='round'] {
+    --_radius: var(--ngx-toast-radius, 20px);
+    --_icon-radius: var(--ngx-toast-icon-radius, 14px);
   }
 
-  &.success {
-    background-color: var(--toast-success-bg);
-    color: var(--toast-success-color);
-    &::before {
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23e7f6e7'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z'/%3E%3C/svg%3E");
-    }
+  &[data-radius='pill'] {
+    --_radius: var(--ngx-toast-radius, 999px);
+    --_icon-radius: var(--ngx-toast-icon-radius, 999px);
+    padding: var(--ngx-toast-padding, 12px 18px);
   }
 
-  &.error {
-    background-color: var(--toast-error-bg);
-    color: var(--toast-error-color);
-    &::before {
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23fdecea'%3E%3Cpath d='M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z'/%3E%3C/svg%3E");
-    }
+  // --- Type accents --------------------------------------------------------
+  &[data-type='success'] {
+    --_accent: var(--_success);
   }
-
-  &.info {
-    background-color: var(--toast-info-bg);
-    color: var(--toast-info-color);
-    &::before {
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23e8f4fd'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z'/%3E%3C/svg%3E");
-    }
+  &[data-type='error'] {
+    --_accent: var(--_error);
   }
-
-  &.pending {
-    background-color: var(--toast-pending-bg);
-    color: var(--toast-pending-color);
-    &::before {
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23fff8e1'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z'/%3E%3C/svg%3E");
-    }
+  &[data-type='warning'] {
+    --_accent: var(--_warning);
   }
-
-  &.no-timeout {
-    animation: slideInRight 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  &[data-type='info'] {
+    --_accent: var(--_info);
   }
-
-  &.top-left, &.bottom-left {
-    animation: slideInLeft 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards,
-               slideOutLeft 0.5s cubic-bezier(0.55, 0.085, 0.68, 0.53) forwards 5s;
-
-    &.no-timeout {
-      animation: slideInLeft 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-    }
+  &[data-type='pending'] {
+    --_accent: var(--_pending);
   }
 }
 
-// Remove the .toast-container animation overrides as they're no longer needed
+.ngx-toast__icon {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: var(--_icon-size);
+  height: var(--_icon-size);
+  color: var(--_glyph);
+  background: var(--_accent);
+  border-radius: var(--_icon-radius);
+
+  svg {
+    width: 60%;
+    height: 60%;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+  }
+}
+
+.ngx-toast__spinner {
+  animation: ngx-toast-spin 900ms linear infinite;
+}
+
+.ngx-toast__body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.ngx-toast__title {
+  margin: 0;
+  color: var(--_title);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+.ngx-toast__message {
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: var(--_message);
+  font-size: 14px;
+  font-weight: 450;
+  line-height: 1.4;
+}
+
+.ngx-toast__close {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  color: var(--_close);
+  background: transparent;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  transition:
+    color 160ms var(--_ease),
+    background-color 160ms var(--_ease);
+
+  svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 2.4;
+    stroke-linecap: round;
+  }
+
+  &:hover {
+    color: var(--_accent);
+    background: var(--_close-hover-bg);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--_accent);
+    outline-offset: 2px;
+  }
+}
+
+.ngx-toast__progress {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: var(--_accent);
+  transform-origin: left center;
+  animation: ngx-toast-progress linear forwards;
+}
+
+// Pause the countdown bar in step with the hover-paused dismiss timer.
+.ngx-toast:hover .ngx-toast__progress {
+  animation-play-state: paused;
+}
+
+// ---------------------------------------------------------------------------
+// Motion.
+// ---------------------------------------------------------------------------
+
+@keyframes ngx-toast-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -10px, 0) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes ngx-toast-out {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(0, -8px, 0) scale(0.96);
+  }
+}
+
+@keyframes ngx-toast-in-right {
+  from {
+    opacity: 0;
+    transform: translate3d(120%, 0, 0) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes ngx-toast-out-right {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(120%, 0, 0) scale(0.96);
+  }
+}
+
+@keyframes ngx-toast-in-left {
+  from {
+    opacity: 0;
+    transform: translate3d(-120%, 0, 0) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes ngx-toast-out-left {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(-120%, 0, 0) scale(0.96);
+  }
+}
+
+@keyframes ngx-toast-in-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 120%, 0) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes ngx-toast-out-down {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(0, 120%, 0) scale(0.96);
+  }
+}
+
+// The centred toast is the showpiece: it springs forward out of a blur,
+// overshoots very slightly, then settles.
+@keyframes ngx-toast-center-in {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0) scale(0.84);
+    filter: blur(12px);
+  }
+  55% {
+    opacity: 1;
+    transform: translate3d(0, -4px, 0) scale(1.03);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+
+@keyframes ngx-toast-center-out {
+  from {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0) scale(0.9);
+    filter: blur(10px);
+  }
+}
+
+@keyframes ngx-toast-backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+// Used only under `prefers-reduced-motion` — opacity alone, no movement.
+@keyframes ngx-toast-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes ngx-toast-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes ngx-toast-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes ngx-toast-progress {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+// --- Per-position entrance / exit pairing ----------------------------------
+
+.ngx-toast {
+  &[data-position='top-right'],
+  &[data-position='bottom-right'] {
+    animation-name: ngx-toast-in-right;
+
+    &.is-leaving {
+      animation: ngx-toast-out-right var(--_exit) var(--_ease) forwards;
+    }
+  }
+
+  &[data-position='top-left'],
+  &[data-position='bottom-left'] {
+    animation-name: ngx-toast-in-left;
+
+    &.is-leaving {
+      animation: ngx-toast-out-left var(--_exit) var(--_ease) forwards;
+    }
+  }
+
+  &[data-position='top-center'] {
+    animation-name: ngx-toast-in;
+
+    &.is-leaving {
+      animation: ngx-toast-out var(--_exit) var(--_ease) forwards;
+    }
+  }
+
+  &[data-position='bottom-center'] {
+    animation-name: ngx-toast-in-up;
+
+    &.is-leaving {
+      animation: ngx-toast-out-down var(--_exit) var(--_ease) forwards;
+    }
+  }
+
+  &[data-position='center'] {
+    width: min(var(--_width), 100%);
+    animation-name: ngx-toast-center-in;
+
+    &.is-leaving {
+      animation: ngx-toast-center-out var(--_exit) var(--_ease) forwards;
+    }
+  }
+
+  // A leaving toast must not react to the pointer any more.
+  &.is-leaving {
+    pointer-events: none;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Responsive + accessibility.
+// ---------------------------------------------------------------------------
+
+@media (max-width: 480px) {
+  :host {
+    --_offset: var(--ngx-toast-offset, 12px);
+    --_icon-size: var(--ngx-toast-icon-size, 40px);
+  }
+
+  .ngx-toast-container:not([data-position='center']) {
+    width: calc(100vw - var(--_offset) * 2);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  // These selectors deliberately carry `[data-position]` so they match the
+  // specificity of the per-position rules above and, coming later, win. A bare
+  // `.ngx-toast` here would lose, and the card would still slide and scale —
+  // just over 1ms instead of 460ms.
+  .ngx-toast[data-position] {
+    animation: ngx-toast-fade-in 1ms linear both;
+    transition: none;
+
+    &:hover {
+      transform: none;
+    }
+  }
+
+  .ngx-toast[data-position].is-leaving {
+    animation: ngx-toast-fade-out 1ms linear forwards;
+  }
+
+  .ngx-toast-backdrop {
+    animation-duration: 1ms;
+  }
+
+  // The spinner still conveys "in progress", so slow it rather than stop it.
+  .ngx-toast__spinner {
+    animation-duration: 2400ms;
+  }
+}

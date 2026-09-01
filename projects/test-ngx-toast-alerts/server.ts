@@ -1,35 +1,51 @@
+import {
+  AngularNodeAppEngine,
+  createNodeRequestHandler,
+  isMainModule,
+  writeResponseToNodeResponse,
+} from '@angular/ssr/node';
 import express from 'express';
-import { join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { join } from 'node:path';
 
-export function app(): express.Express {
-  const server = express();
-  const currentFilePath = fileURLToPath(import.meta.url);
-  const currentDirPath = resolve(currentFilePath, '..');
-  const browserDistFolder = resolve(currentDirPath, '../browser');
+const browserDistFolder = join(import.meta.dirname, '../browser');
 
-  // Serve static files from /browser
-  server.get('**', express.static(browserDistFolder, {
+const app = express();
+const angularApp = new AngularNodeAppEngine();
+
+/**
+ * Serve static files from /browser.
+ */
+app.use(
+  express.static(browserDistFolder, {
     maxAge: '1y',
-    index: 'index.html',
-  }));
+    index: false,
+    redirect: false,
+  }),
+);
 
-  // Fallback to index.html
-  server.use('*', (req, res) => {
-    res.sendFile(join(browserDistFolder, 'index.html'));
-  });
+/**
+ * Handle every other request with the Angular SSR engine.
+ */
+app.use((req, res, next) => {
+  angularApp
+    .handle(req)
+    .then((response) =>
+      response ? writeResponseToNodeResponse(response, res) : next(),
+    )
+    .catch(next);
+});
 
-  return server;
-}
-
-function run(): void {
+/**
+ * Start the server when this module is the entry point.
+ */
+if (isMainModule(import.meta.url)) {
   const port = process.env['PORT'] || 4000;
-
-  // Start up the Node server
-  const server = app();
-  server.listen(port, () => {
+  app.listen(port, () => {
     console.log(`Node Express server listening on http://localhost:${port}`);
   });
 }
 
-run();
+/**
+ * Request handler used by the Angular CLI (dev-server and during build).
+ */
+export const reqHandler = createNodeRequestHandler(app);

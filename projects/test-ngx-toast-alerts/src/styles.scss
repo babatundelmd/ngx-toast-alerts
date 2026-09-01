@@ -1,1 +1,35 @@
-/* You can add global styles to this file, and also import other style files */
+:root {
+  --page-bg: #f6f7f9;
+  --page-surface: #ffffff;
+  --page-fg: #0d1117;
+  --page-muted: #6b7280;
+  --page-border: #e3e6ea;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --page-bg: #0d1117;
+    --page-surface: #171a21;
+    --page-fg: #f3f5f8;
+    --page-muted: #9aa3b2;
+    --page-border: #262b34;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  color: var(--page-fg);
+  background: var(--page-bg);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue',
+    Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}

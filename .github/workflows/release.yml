@@ -1,0 +1,123 @@
+name: Release
+
+# Runs on every merge to main. The full CI suite runs first; the publish step
+# then only fires when the library's version is not yet on npm. That makes an
+# ordinary merge a no-op and a version bump the thing that ships a release —
+# rather than publishing on every merge, which would burn a version number on
+# every docs typo.
+on:
+  push:
+    branches: [main]
+  # Lets a maintainer re-run a release that failed after the version was merged.
+  workflow_dispatch:
+
+# Never cancel a release in flight, and never run two at once.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  # The exact same checks PRs run — build and test on Node 20/22/24, the
+  # Playwright suite, and the pack-and-install verification.
+  checks:
+    name: Checks
+    uses: ./.github/workflows/ci.yml
+
+  release:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+    needs: checks
+
+    permissions:
+      contents: write # create the tag and the GitHub Release
+      id-token: write # npm provenance attestation
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          registry-url: https://registry.npmjs.org
+
+      - run: npm ci
+
+      # The project .npmrc is committed for `omit=peer`. It must never carry a
+      # credential — fail loudly rather than publish from a compromised config.
+      - name: Refuse to release if .npmrc holds a credential
+        run: |
+          if grep -qiE '(_auth|_authToken|_password|//.+:_)' .npmrc; then
+            echo "::error file=.npmrc::.npmrc contains what looks like a credential. Remove it and rotate the token."
+            exit 1
+          fi
+          echo "No credentials in .npmrc."
+
+      - name: Read the version to release
+        id: version
+        run: npm run --silent lint:versions
+
+      - name: Is this version already on npm?
+        id: published
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          if npm view "ngx-toast-alerts@${VERSION}" version >/dev/null 2>&1; then
+            echo "already=true" >> "$GITHUB_OUTPUT"
+            echo "ngx-toast-alerts@${VERSION} is already published — nothing to do."
+          else
+            echo "already=false" >> "$GITHUB_OUTPUT"
+            echo "ngx-toast-alerts@${VERSION} is new — releasing."
+          fi
+
+      - name: Build the publishable package
+        if: steps.published.outputs.already == 'false'
+        run: npm run prepack:lib
+
+      - name: Publish
+        if: steps.published.outputs.already == 'false'
+        working-directory: dist/ngx-toast-alerts
+        # --provenance links the tarball to this workflow run and commit, so
+        # consumers can verify where it was built.
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Tag the release
+        if: steps.published.outputs.already == 'false'
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "v${VERSION}" -m "ngx-toast-alerts v${VERSION}"
+          git push origin "v${VERSION}"
+
+      - name: Create the GitHub Release
+        if: steps.published.outputs.already == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          gh release create "v${VERSION}" \
+            --title "v${VERSION}" \
+            --generate-notes \
+            --verify-tag
+
+      - name: Summary
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          ALREADY: ${{ steps.published.outputs.already }}
+        run: |
+          if [ "$ALREADY" = "true" ]; then
+            echo "### No release" >> "$GITHUB_STEP_SUMMARY"
+            echo "Version \`${VERSION}\` is already on npm. Bump the version in **both** \`package.json\` and \`projects/ngx-toast-alerts/package.json\` to publish." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "### Released \`ngx-toast-alerts@${VERSION}\`" >> "$GITHUB_STEP_SUMMARY"
+            echo "- [npm](https://www.npmjs.com/package/ngx-toast-alerts/v/${VERSION})" >> "$GITHUB_STEP_SUMMARY"
+            echo "- Tagged \`v${VERSION}\` with a GitHub Release" >> "$GITHUB_STEP_SUMMARY"
+          fi

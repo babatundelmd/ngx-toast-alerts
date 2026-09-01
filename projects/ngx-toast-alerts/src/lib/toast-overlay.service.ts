@@ -1,33 +1,47 @@
-import { ApplicationRef, ComponentRef, createComponent, EnvironmentInjector, Injectable, inject, PLATFORM_ID } from '@angular/core';
+import { ApplicationRef, ComponentRef, createComponent, DestroyRef, DOCUMENT, EnvironmentInjector, inject, PLATFORM_ID, Service } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { NgxToastAlertsComponent } from './ngx-toast-alerts.component';
 
-@Injectable({providedIn: 'root'})
+/**
+ * Owns the single `<ngx-toast-alerts>` host that the library appends to
+ * `<body>`. Consumers never place the component in a template themselves.
+ */
+@Service()
 export class ToastOverlayService {
-  private toastComponentRef: ComponentRef<NgxToastAlertsComponent> | null = null;
-  private appRef = inject(ApplicationRef);
-  private injector = inject(EnvironmentInjector);
-  private platformId = inject(PLATFORM_ID);
+  private componentRef: ComponentRef<NgxToastAlertsComponent> | null = null;
 
-  createToastOverlay() {
-    if (!isPlatformBrowser(this.platformId)) {
+  private readonly appRef = inject(ApplicationRef);
+  private readonly injector = inject(EnvironmentInjector);
+  private readonly document = inject(DOCUMENT);
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+
+  constructor() {
+    inject(DestroyRef).onDestroy(() => this.destroyToastOverlay());
+  }
+
+  /** Mount the overlay host. Safe to call repeatedly and on the server. */
+  createToastOverlay(): void {
+    if (!this.isBrowser || this.componentRef) {
       return;
     }
 
-    if (this.toastComponentRef) {
-      return;
-    }
-
-    // Create the component
-    this.toastComponentRef = createComponent(NgxToastAlertsComponent, {
+    this.componentRef = createComponent(NgxToastAlertsComponent, {
       environmentInjector: this.injector,
-      elementInjector: this.injector
     });
 
-    // Attach the component to the app
-    document.body.appendChild(this.toastComponentRef.location.nativeElement);
+    this.document.body.appendChild(this.componentRef.location.nativeElement);
+    this.appRef.attachView(this.componentRef.hostView);
+  }
 
-    // Attach the component to the application change detection mechanism
-    this.appRef.attachView(this.toastComponentRef.hostView);
+  /** Tear the overlay host back down. */
+  destroyToastOverlay(): void {
+    if (!this.componentRef) {
+      return;
+    }
+
+    this.appRef.detachView(this.componentRef.hostView);
+    this.componentRef.location.nativeElement.remove();
+    this.componentRef.destroy();
+    this.componentRef = null;
   }
 }
