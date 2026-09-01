@@ -40,6 +40,9 @@
     "publish:lib": "npm run prepack:lib && cd dist/ngx-toast-alerts && npm publish"
   },
   "private": false,
+  "engines": {
+    "node": "^22.22.3 || ^24.15.0 || >=26.0.0"
+  },
   "devDependencies": {
     "@angular/build": "^22.1.6",
     "@angular/cli": "^22.1.6",

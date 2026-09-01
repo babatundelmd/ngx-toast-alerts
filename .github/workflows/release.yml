@@ -20,7 +20,7 @@ permissions:
   contents: read
 
 jobs:
-  # The exact same checks PRs run — build and test on Node 20/22/24, the
+  # The exact same checks PRs run — build and test on Node 22/24, the
   # Playwright suite, and the pack-and-install verification.
   checks:
     name: Checks

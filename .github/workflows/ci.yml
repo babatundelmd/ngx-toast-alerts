@@ -22,10 +22,18 @@ jobs:
     name: Build and test (Node ${{ matrix.node }})
     runs-on: ubuntu-latest
 
+    # Angular 22 requires ^22.22.3 || ^24.15.0 || >=26.0.0 — Node 20 is not
+    # supported at all. 22 and 24 are the LTS lines and must pass; 26 is the
+    # current line, run for early warning but not allowed to block a release.
     strategy:
       fail-fast: false
       matrix:
-        node: [20, 22, 24]
+        node: [22, 24]
+        include:
+          - node: 26
+            experimental: true
+
+    continue-on-error: ${{ matrix.experimental == true }}
 
     steps:
       - uses: actions/checkout@v4

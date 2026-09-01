@@ -8,7 +8,9 @@ By taking part you agree to abide by the [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## Getting set up
 
-You need Node 20.19+, 22.12+ or 24+ — the versions Angular 22 supports.
+You need Node **22.22.3+, 24.15.0+ or 26+** — the range Angular 22 requires
+(`^22.22.3 || ^24.15.0 || >=26.0.0`). Node 20 is not supported. The root
+`package.json` declares this in `engines`, so npm will warn you on install.
 
 ```bash
 git clone https://github.com/babatundelmd/ngx-toast-alerts.git
@@ -41,11 +43,11 @@ than deleting the `.npmrc`.
 | `npm run e2e:ui` | Run the E2E suite in Playwright's interactive UI |
 | `npm run e2e:debug` | Step through a test with the inspector |
 | `npm run e2e:report` | Open the last E2E HTML report |
+| `npm run build:demo` | Build the demo app, including SSR |
 
 `npm run e2e` is **headless** — you will not see a browser window, which is
 normal. Use `e2e:headed` to watch it drive the demo, or `e2e:ui` to scrub
 through each step with a DOM snapshot per action.
-| `npm run build:demo` | Build the demo app, including SSR |
 
 The demo app under `projects/test-ngx-toast-alerts` imports the library through
 the `ngx-toast-alerts` path mapping, which points at `dist/`. Nothing can
@@ -148,7 +150,8 @@ the one either of us would have designed up front.
 7. Commit, push, and open a pull request against `main`.
 
 Please describe **what** the change is and **why** it is needed. CI runs the
-build and tests on Node 20, 22 and 24.
+build and tests on Node 22 and 24 (the LTS lines), plus Node 26 as a
+non-blocking early warning.
 
 ## Code style
 
@@ -184,7 +187,7 @@ Open a release PR that:
    [CHANGELOG.md](CHANGELOG.md), and updates the comparison links at the bottom.
 
 When that PR merges, `.github/workflows/release.yml` runs the full CI suite —
-build and test on Node 20/22/24, Playwright, and the pack-and-install
+build and test on Node 22/24 (and 26 advisory), Playwright, and the pack-and-install
 verification — and then, **only if that version is not already on npm**:
 
 - publishes with `--provenance`, so the tarball is cryptographically linked to
