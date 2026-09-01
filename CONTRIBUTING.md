@@ -48,9 +48,15 @@ through each step with a DOM snapshot per action.
 | `npm run build:demo` | Build the demo app, including SSR |
 
 The demo app under `projects/test-ngx-toast-alerts` imports the library through
-the `ngx-toast-alerts` path mapping, which points at `dist/`. `npm start`,
-`npm run build:demo` and `npm run test:demo` all build the library first, so
-this is handled for you.
+the `ngx-toast-alerts` path mapping, which points at `dist/`. Nothing can
+type-check the demo until the library has been built at least once.
+
+Every script that needs it therefore builds the library first — `npm start`,
+`npm test`, `npm run test:demo`, `npm run typecheck`, `npm run build:demo`,
+`npm run e2e` and `npm run verify:package` all work on a clean checkout with no
+`dist/`. **If you add a script that touches the demo or the root tsconfig,
+prefix it with `npm run build &&` too**, or it will pass locally where `dist/`
+already exists and fail in CI where it does not.
 
 The demo exercises every position, radius and type — it is the fastest way to
 see a visual change. It is also load-bearing beyond that: the library's own

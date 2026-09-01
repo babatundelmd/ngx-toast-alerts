@@ -45,13 +45,16 @@ jobs:
       - name: Check the CSS theming contract
         run: npm run lint:tokens
 
+      # The demo resolves `ngx-toast-alerts` through a tsconfig path mapping to
+      # dist/, so the library must exist before anything type-checks it. Every
+      # script below builds it first, so they also work on a clean checkout.
+      - name: Build the library
+        run: npm run build
+
       # The root tsconfig is what editors resolve spec files against, so a
       # green `ng test` alone can still leave red squiggles in the IDE.
       - name: Type-check the workspace
         run: npm run typecheck
-
-      - name: Build the library
-        run: npm run build
 
       - name: Test the library
         run: npm test
