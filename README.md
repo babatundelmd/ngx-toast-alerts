@@ -7,6 +7,8 @@ that springs out of a blur.
 [![downloads](https://img.shields.io/npm/dm/ngx-toast-alerts.svg)](https://www.npmjs.com/package/ngx-toast-alerts)
 [![license](https://img.shields.io/npm/l/ngx-toast-alerts.svg)](LICENSE)
 
+**[Live playground and docs →](https://babatundelmd.github.io/ngx-toast-alerts/)**
+
 No template wiring, no module imports, no web fonts. Inject the service and call
 a method — the library mounts its own overlay the first time you use it.
 

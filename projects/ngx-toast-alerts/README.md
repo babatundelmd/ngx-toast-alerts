@@ -7,6 +7,8 @@ that springs out of a blur.
 [![downloads](https://img.shields.io/npm/dm/ngx-toast-alerts.svg)](https://www.npmjs.com/package/ngx-toast-alerts)
 [![license](https://img.shields.io/npm/l/ngx-toast-alerts.svg)](https://github.com/babatundelmd/ngx-toast-alerts/blob/main/LICENSE)
 
+**[Live playground and docs →](https://babatundelmd.github.io/ngx-toast-alerts/)**
+
 No template wiring, no module imports, no web fonts. Inject the service and call
 a method — the library mounts its own overlay the first time you use it.
 
@@ -203,7 +205,8 @@ surface token pins that value in both themes; wrap overrides in your own
 
 ## Links
 
-- [Documentation and demo](https://github.com/babatundelmd/ngx-toast-alerts#readme)
+- [Live playground and docs](https://babatundelmd.github.io/ngx-toast-alerts/)
+- [Documentation](https://github.com/babatundelmd/ngx-toast-alerts#readme)
 - [Changelog](https://github.com/babatundelmd/ngx-toast-alerts/blob/main/CHANGELOG.md)
 - [Report an issue](https://github.com/babatundelmd/ngx-toast-alerts/issues)
 

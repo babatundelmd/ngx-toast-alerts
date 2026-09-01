@@ -1,72 +1,363 @@
-<main class="page">
-  <header class="hero">
-    <p class="eyebrow">ngx-toast-alerts v3</p>
-    <h1>Rounded toasts for Angular 22</h1>
-    <p class="lede">
-      Signal-driven, zoneless, SSR-safe. Six edge positions plus a centred toast
-      that springs out of a blur.
+<a class="skip" href="#playground">Skip to the playground</a>
+
+<header class="topbar">
+  <span class="wordmark">ngx-toast-alerts</span>
+  <nav class="topnav">
+    <a href="#playground">Playground</a>
+    <a href="#start">Quick start</a>
+    <a href="#api">API</a>
+    <a href="#contributors">Contributors</a>
+    <a [href]="repoUrl" target="_blank" rel="noreferrer noopener">GitHub</a>
+  </nav>
+</header>
+
+<main>
+  <!-- ── Hero ──────────────────────────────────────────────────────────── -->
+  <section class="hero">
+    <div class="hero__copy">
+      <p class="eyebrow">
+        <span class="dot"></span> v{{ version }} · Angular 22
+      </p>
+
+      <h1>
+        Toasts that feel<br />
+        <em>designed</em>, not bolted on.
+      </h1>
+
+      <p class="lede">
+        Rounded, animated notifications for Angular. Signal-driven, zoneless and
+        SSR-safe — with a centred toast that springs out of a blur.
+      </p>
+
+      <div class="install">
+        <code>{{ installCommand }}</code>
+        <button
+          type="button"
+          class="install__copy"
+          [attr.aria-label]="copied() ? 'Copied' : 'Copy install command'"
+          (click)="copyInstall()"
+        >
+          @if (copied()) {
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+              <path d="M4 12.5 9.5 18 20 7" />
+            </svg>
+          } @else {
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+              <rect x="9" y="9" width="11" height="11" rx="2.5" />
+              <path d="M15 5.5A2.5 2.5 0 0 0 12.5 3h-7A2.5 2.5 0 0 0 3 5.5v7A2.5 2.5 0 0 0 5.5 15" />
+            </svg>
+          }
+        </button>
+      </div>
+
+      <div class="hero__cta">
+        <a class="btn btn--solid" href="#playground">Try it live</a>
+        <a class="btn" [href]="repoUrl" target="_blank" rel="noreferrer noopener">
+          Star on GitHub
+        </a>
+        <a class="btn btn--quiet" [href]="npmUrl" target="_blank" rel="noreferrer noopener">
+          npm
+        </a>
+      </div>
+    </div>
+
+    <!-- Decorative stack: shows the product before anyone clicks anything. -->
+    <div class="hero__art" aria-hidden="true">
+      <div class="chip chip--success">
+        <span class="chip__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M2 13.5 6 17.5 13.5 10" />
+            <path d="M9 13.5 13 17.5 22 8.5" />
+          </svg>
+        </span>
+        <span class="chip__body">
+          <strong>Success</strong>
+          <span>Your changes have been saved</span>
+        </span>
+        <span class="chip__x">&times;</span>
+      </div>
+
+      <div class="chip chip--pending">
+        <span class="chip__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <circle cx="12" cy="12" r="9" opacity="0.3" />
+            <path d="M21 12a9 9 0 0 0-9-9" />
+          </svg>
+        </span>
+        <span class="chip__body">
+          <strong>Notifications UI design</strong>
+          <span>Read the full tutorial to enhance your skills</span>
+        </span>
+        <span class="chip__x">&times;</span>
+      </div>
+
+      <div class="chip chip--warning">
+        <span class="chip__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M12 3.5 22 20H2Z" stroke-linejoin="round" />
+            <path d="M12 9.5v4.2" />
+            <path d="M12 17h.01" />
+          </svg>
+        </span>
+        <span class="chip__body">
+          <strong>Warning</strong>
+          <span>Your session expires in 2 minutes</span>
+        </span>
+        <span class="chip__x">&times;</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Playground ────────────────────────────────────────────────────── -->
+  <section class="section" id="playground">
+    <div class="section__head">
+      <h2>Playground</h2>
+      <p>Every control below fires a real toast from the published package.</p>
+    </div>
+
+    <div class="board">
+      <div class="board__controls">
+        <fieldset class="field">
+          <legend>Position</legend>
+          <!-- The picker is a little viewport: pick the corner you mean. -->
+          <div class="viewport">
+            @for (option of positions; track option) {
+              <button
+                type="button"
+                class="viewport__slot"
+                [class.is-active]="position() === option"
+                [attr.data-slot]="option"
+                [attr.aria-label]="option"
+                [attr.aria-pressed]="position() === option"
+                (click)="setPosition(option)"
+              >
+                <span class="viewport__mark"></span>
+              </button>
+            }
+            <span class="viewport__label">{{ position() }}</span>
+          </div>
+        </fieldset>
+
+        <fieldset class="field">
+          <legend>Corner radius</legend>
+          <div class="segmented">
+            @for (option of radii; track option) {
+              <button
+                type="button"
+                class="segmented__item"
+                [class.is-active]="radius() === option"
+                [attr.aria-pressed]="radius() === option"
+                (click)="setRadius(option)"
+              >
+                <span class="segmented__preview" [attr.data-radius]="option"></span>
+                {{ option }}
+              </button>
+            }
+          </div>
+        </fieldset>
+      </div>
+
+      <div class="board__actions">
+        <fieldset class="field">
+          <legend>Types</legend>
+          <div class="row">
+            @for (type of types; track type) {
+              <button
+                type="button"
+                class="pill"
+                [attr.data-type]="type"
+                (click)="show(type)"
+              >
+                <span class="pill__dot"></span>{{ type }}
+              </button>
+            }
+          </div>
+        </fieldset>
+
+        <fieldset class="field">
+          <legend>Showcase</legend>
+          <div class="row">
+            <button type="button" class="pill pill--hero" (click)="showCenter()">
+              Centred toast
+            </button>
+            <button type="button" class="pill" (click)="showCenterPersistent()">
+              Centred, no timeout
+            </button>
+            <button type="button" class="pill" (click)="showProgress()">
+              With progress bar
+            </button>
+            <button type="button" class="pill" (click)="showStack()">
+              Stack of five
+            </button>
+            <button type="button" class="pill pill--ghost" (click)="dismissAll()">
+              Dismiss all
+            </button>
+          </div>
+        </fieldset>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Features ──────────────────────────────────────────────────────── -->
+  <section class="section">
+    <div class="section__head">
+      <h2>Why this one</h2>
+    </div>
+
+    <ul class="features">
+      @for (feature of features; track feature.title) {
+        <li class="feature" [style.--accent]="feature.accent">
+          <h3>{{ feature.title }}</h3>
+          <p>{{ feature.detail }}</p>
+        </li>
+      }
+    </ul>
+  </section>
+
+  <!-- ── Quick start ───────────────────────────────────────────────────── -->
+  <section class="section" id="start">
+    <div class="section__head">
+      <h2>Quick start</h2>
+      <p>
+        The provider is optional — the service is root-provided and mounts its
+        own overlay on the first toast.
+      </p>
+    </div>
+
+    <div class="snippets">
+      <figure class="snippet">
+        <figcaption><span>1</span> Set your defaults (optional)</figcaption>
+        <pre><code>{{ setupSnippet }}</code></pre>
+      </figure>
+
+      <figure class="snippet">
+        <figcaption><span>2</span> Inject and call</figcaption>
+        <pre><code>{{ usageSnippet }}</code></pre>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ── API reference ─────────────────────────────────────────────────── -->
+  <section class="section" id="api">
+    <div class="section__head">
+      <h2>API reference</h2>
+      <p>
+        Everything the package exposes. Full docs live in the
+        <a [href]="repoUrl + '#readme'" target="_blank" rel="noreferrer noopener">README</a>.
+      </p>
+    </div>
+
+    <h3 class="table-title">NgxToastAlertsService</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th scope="col">Member</th><th scope="col">Returns</th><th scope="col">Description</th></tr>
+        </thead>
+        <tbody>
+          @for (row of methods; track row.name) {
+            <tr>
+              <td><code>{{ row.name }}</code></td>
+              <td class="muted"><code>{{ row.type }}</code></td>
+              <td>{{ row.detail }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="table-title">NgxToastAlertsConfig</h3>
+    <p class="table-note">
+      Set globally in <code>provideNgxToastAlerts()</code>, or override on a
+      single toast.
     </p>
-  </header>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th scope="col">Option</th><th scope="col">Type</th><th scope="col">Default</th><th scope="col">Description</th></tr>
+        </thead>
+        <tbody>
+          @for (row of options; track row.name) {
+            <tr>
+              <td><code>{{ row.name }}</code></td>
+              <td class="muted"><code>{{ row.type }}</code></td>
+              <td class="muted"><code>{{ row.fallback }}</code></td>
+              <td>{{ row.detail }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
 
-  <section class="panel">
-    <h2>Position</h2>
-    <div class="chips">
-      @for (option of positions; track option) {
-        <button
-          type="button"
-          class="chip"
-          [class.is-active]="position() === option"
-          (click)="setPosition(option)"
-        >
-          {{ option }}
-        </button>
-      }
+    <h3 class="table-title">CSS custom properties</h3>
+    <p class="table-note">
+      Set these anywhere above the toast — <code>:root</code> is the usual place.
+      The library only ever reads them, so your value always wins.
+    </p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th scope="col">Property</th><th scope="col">Type</th><th scope="col">Default</th><th scope="col">Description</th></tr>
+        </thead>
+        <tbody>
+          @for (row of tokens; track row.name) {
+            <tr>
+              <td><code>{{ row.name }}</code></td>
+              <td class="muted"><code>{{ row.type }}</code></td>
+              <td class="muted"><code>{{ row.fallback }}</code></td>
+              <td>{{ row.detail }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
     </div>
   </section>
 
-  <section class="panel">
-    <h2>Corner radius</h2>
-    <div class="chips">
-      @for (option of radii; track option) {
-        <button
-          type="button"
-          class="chip"
-          [class.is-active]="radius() === option"
-          (click)="setRadius(option)"
-        >
-          {{ option }}
-        </button>
-      }
+  <!-- ── Contributors ──────────────────────────────────────────────────── -->
+  <section class="section" id="contributors">
+    <div class="section__head">
+      <h2>Contributors</h2>
+      <p>
+        This project exists thanks to the people who build it.
+        <a [href]="repoUrl + '/blob/main/CONTRIBUTING.md'" target="_blank" rel="noreferrer noopener">
+          Contribute
+        </a>
+        — issues, ideas and pull requests are all welcome.
+      </p>
     </div>
-  </section>
 
-  <section class="panel">
-    <h2>Types</h2>
-    <div class="chips">
-      @for (type of types; track type) {
-        <button type="button" class="btn" [attr.data-type]="type" (click)="show(type)">
-          {{ type }}
-        </button>
+    <ul class="people">
+      @for (person of contributors; track person.handle) {
+        <li>
+          <a
+            class="person"
+            [href]="profileUrl(person.handle)"
+            [title]="person.name + ' — ' + person.role"
+            target="_blank"
+            rel="noreferrer noopener"
+          >
+            <img
+              [src]="avatarUrl(person.handle)"
+              [alt]="person.name"
+              width="42"
+              height="42"
+              decoding="async"
+            />
+          </a>
+        </li>
       }
-    </div>
-  </section>
-
-  <section class="panel">
-    <h2>Showcase</h2>
-    <div class="chips">
-      <button type="button" class="btn btn--primary" (click)="showCenter()">
-        Centred toast
-      </button>
-      <button type="button" class="btn" (click)="showCenterPersistent()">
-        Centred, no timeout
-      </button>
-      <button type="button" class="btn" (click)="showProgress()">
-        With progress bar
-      </button>
-      <button type="button" class="btn" (click)="showStack()">Stack of five</button>
-      <button type="button" class="btn btn--ghost" (click)="dismissAll()">
-        Dismiss all
-      </button>
-    </div>
+    </ul>
   </section>
 </main>
+
+<footer class="footer">
+  <div class="footer__inner">
+    <p class="footer__mark">ngx-toast-alerts</p>
+    <nav class="footer__links">
+      <a [href]="repoUrl" target="_blank" rel="noreferrer noopener">GitHub</a>
+      <a [href]="npmUrl" target="_blank" rel="noreferrer noopener">npm</a>
+      <a [href]="repoUrl + '/blob/main/CHANGELOG.md'" target="_blank" rel="noreferrer noopener">Changelog</a>
+      <a [href]="repoUrl + '/issues'" target="_blank" rel="noreferrer noopener">Issues</a>
+    </nav>
+    <p class="footer__legal">MIT © Babatunde Lamidi</p>
+  </div>
+</footer>
