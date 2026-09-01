@@ -107,29 +107,50 @@ test.describe('positions', () => {
 
     test('springs in from a smaller, blurred state and settles', async () => {
       await toast.showCentred();
+      await toast.newest.waitFor({ state: 'visible' });
+      const frames = await toast.newest.evaluate((element) => {
+        const animation = element
+          .getAnimations()
+          .find(
+            (candidate): candidate is CSSAnimation =>
+              'animationName' in candidate &&
+              String((candidate as CSSAnimation).animationName).includes(
+                'ngx-toast-center-in',
+              ),
+          );
+        if (!animation?.effect) {
+          throw new Error('the centred toast has no entrance animation');
+        }
 
-      // The spring entrance starts at scale(0.84) with a 12px blur, so the
-      // first frame is both smaller and blurred.
-      const early = await toast.newest.evaluate((element) => ({
-        width: element.getBoundingClientRect().width,
-        filter: getComputedStyle(element).filter,
-      }));
+        const keyframes = (
+          animation.effect as KeyframeEffect
+        ).getKeyframes() as unknown as Array<Record<string, unknown>>;
+        return {
+          name: animation.animationName,
+          count: keyframes.length,
+          first: {
+            transform: String(keyframes[0]['transform'] ?? ''),
+            filter: String(keyframes[0]['filter'] ?? ''),
+          },
+          last: {
+            transform: String(keyframes[keyframes.length - 1]['transform'] ?? ''),
+            filter: String(keyframes[keyframes.length - 1]['filter'] ?? ''),
+          },
+        };
+      });
+
+      expect(frames.name).toContain('ngx-toast-center-in');
+      expect(frames.count).toBeGreaterThanOrEqual(3);
+
+      // Starts scaled down and blurred…
+      expect(frames.first.transform).toContain('scale(0.84)');
+      expect(frames.first.filter).toBe('blur(12px)');
+
+      // …and ends at natural size, perfectly sharp.
+      expect(frames.last.transform).toBe('none');
+      expect(frames.last.filter).toBe('blur(0px)');
 
       await toast.waitForSettled();
-
-      const settled = await toast.newest.evaluate((element) => ({
-        width: element.getBoundingClientRect().width,
-        filter: getComputedStyle(element).filter,
-      }));
-
-      expect(settled.width).toBeGreaterThan(early.width);
-
-      // The entrance starts blurred and must end perfectly sharp. The
-      // animation's `both` fill mode retains the final keyframe, so the
-      // settled value is `blur(0px)` rather than `none`.
-      expect(parseFloat(early.filter.replace(/[^\d.]/g, ''))).toBeGreaterThan(0);
-      expect(['none', 'blur(0px)']).toContain(settled.filter);
-
       expect(await hasNoTransform(toast.newest)).toBe(true);
     });
   });

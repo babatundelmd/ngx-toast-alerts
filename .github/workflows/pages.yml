@@ -1,0 +1,66 @@
+name: Pages
+
+# Deploys the landing page to GitHub Pages on every merge to main.
+#
+# Deliberately separate from release.yml: docs should ship without a version
+# bump, and a copy tweak must never be able to touch an npm publish.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build the site
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # The `github-pages` configuration drops SSR and prerenders to static
+      # HTML under the repo's base href — GitHub Pages cannot host a Node
+      # server. `build:demo` builds the library first.
+      - name: Build the landing page
+        run: npm run build:pages
+
+      # Without this, Pages runs the output through Jekyll and drops any file
+      # or directory whose name starts with an underscore.
+      - name: Disable Jekyll processing
+        run: touch dist/test-ngx-toast-alerts/browser/.nojekyll
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/test-ngx-toast-alerts/browser
+
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    needs: build
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -94,6 +94,24 @@
               "aot": false,
               "optimization": false,
               "extractLicenses": false
+            },
+            "github-pages": {
+              "outputMode": "static",
+              "baseHref": "/ngx-toast-alerts/",
+              "optimization": true,
+              "outputHashing": "all",
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "600kB",
+                  "maximumError": "1.2MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "20kB",
+                  "maximumError": "40kB"
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"

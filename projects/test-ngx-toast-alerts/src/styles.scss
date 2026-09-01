@@ -1,35 +1,105 @@
 :root {
-  --page-bg: #f6f7f9;
-  --page-surface: #ffffff;
-  --page-fg: #0d1117;
-  --page-muted: #6b7280;
-  --page-border: #e3e6ea;
-}
+  /* Canvas */
+  --ink: #07090d;
+  --ink-raised: #0d1118;
+  --ink-card: #11161f;
+  --line: #1c2432;
+  --line-bright: #2a3547;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --page-bg: #0d1117;
-    --page-surface: #171a21;
-    --page-fg: #f3f5f8;
-    --page-muted: #9aa3b2;
-    --page-border: #262b34;
-  }
+  /* Type */
+  --fg: #eef2f8;
+  --fg-dim: #97a3b6;
+  --fg-faint: #5d6980;
+
+  /* Accents — the library's own palette */
+  --brand: #8fa2f5;
+  --brand-deep: #6d83ee;
+  --green: #34c88a;
+  --red: #e0796d;
+  --amber: #efb265;
+  --slate: #9aa2ae;
+
+  --display: 'Bricolage Grotesque', ui-sans-serif, sans-serif;
+  --sans: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', monospace;
+
+  --radius: 18px;
+  --shell: 1120px;
+
+  color-scheme: dark;
 }
 
 * {
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
 html,
 body {
-  min-height: 100%;
   margin: 0;
+  min-height: 100%;
 }
 
 body {
-  color: var(--page-fg);
-  background: var(--page-bg);
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue',
-    Arial, sans-serif;
+  position: relative;
+  color: var(--fg);
+  background: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* Atmosphere: a faint dot grid, plus a cool glow bleeding from the top.
+   Fixed so it does not scroll with the content. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle at center, rgba(143, 162, 245, 0.13) 1px, transparent 1px);
+  background-size: 26px 26px;
+  mask-image: radial-gradient(ellipse 90% 55% at 50% 0%, #000 20%, transparent 78%);
+  -webkit-mask-image: radial-gradient(ellipse 90% 55% at 50% 0%, #000 20%, transparent 78%);
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 40% at 18% -6%, rgba(109, 131, 238, 0.22), transparent 70%),
+    radial-gradient(ellipse 46% 34% at 88% 4%, rgba(52, 200, 138, 0.11), transparent 70%);
+}
+
+::selection {
+  background: var(--brand);
+  color: #0a0d14;
+}
+
+:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+a {
+  color: inherit;
+}
+
+code {
+  font-family: var(--mono);
 }

@@ -22,6 +22,7 @@
     "start": "npm run build && ng serve test-ngx-toast-alerts",
     "build": "ng build ngx-toast-alerts",
     "build:demo": "npm run build && ng build test-ngx-toast-alerts",
+    "build:pages": "npm run build && ng build test-ngx-toast-alerts --configuration github-pages",
     "watch": "ng build ngx-toast-alerts --watch --configuration development",
     "test": "npm run build && ng test ngx-toast-alerts",
     "test:demo": "npm run build && ng test test-ngx-toast-alerts",
