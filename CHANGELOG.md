@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.1] - 2026-09-01
+
+Tooling only — the library code and its README are byte-for-byte identical to
+3.0.0. Upgrading gains you nothing; there is no reason to rush.
+
+### Changed
+
+- GitHub Release notes are now generated from this changelog rather than from
+  commit titles, and a release now fails *before* publishing if its version has
+  no changelog entry.
+- The CI Node matrix now matches what Angular 22 actually requires
+  (`^22.22.3 || ^24.15.0 || >=26.0.0`): Node 22 and 24 must pass, Node 26 runs
+  as an advisory check. Node 20 was never supported and has been dropped.
+- `npm run typecheck` and `npm test` build the library first, so every script
+  works on a clean checkout rather than depending on a warm `dist/`.
+
 ## [3.0.0] - 2026-09-01
 
 A full visual redesign, a new centred toast, and a move to Angular 22.
@@ -154,7 +170,8 @@ applications only need the dependency bump. Beyond that:
 > Entries before 3.0.0 were reconstructed from the published release history;
 > the 2.0.1–2.0.7 patch releases are folded into the 2.0.8 entry.
 
-[Unreleased]: https://github.com/babatundelmd/ngx-toast-alerts/compare/v3.0.0...HEAD
+[Unreleased]: https://github.com/babatundelmd/ngx-toast-alerts/compare/v3.0.1...HEAD
+[3.0.1]: https://github.com/babatundelmd/ngx-toast-alerts/compare/v3.0.0...v3.0.1
 [3.0.0]: https://github.com/babatundelmd/ngx-toast-alerts/compare/v2.0.8...v3.0.0
 [2.0.8]: https://github.com/babatundelmd/ngx-toast-alerts/compare/v2.0.0...v2.0.8
 [2.0.0]: https://github.com/babatundelmd/ngx-toast-alerts/compare/v1.0.0...v2.0.0
