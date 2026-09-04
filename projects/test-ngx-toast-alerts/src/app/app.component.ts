@@ -6,6 +6,7 @@ import {
 } from '@angular/core';
 import {
   NgxToastAlertsService,
+  NgxToastEvent,
   NgxToastPosition,
   NgxToastRadius,
   NgxToastType,
@@ -40,7 +41,7 @@ interface Contributor {
 export class AppComponent {
   private readonly toast = inject(NgxToastAlertsService);
 
-  readonly version = '3.0.1';
+  readonly version = '3.1.0';
   readonly repoUrl = 'https://github.com/babatundelmd/ngx-toast-alerts';
   readonly npmUrl = 'https://www.npmjs.com/package/ngx-toast-alerts';
   readonly installCommand = 'npm install ngx-toast-alerts';
@@ -93,6 +94,20 @@ export class AppComponent {
   readonly position = signal<NgxToastPosition>('top-right');
   readonly radius = signal<NgxToastRadius>('round');
 
+  /** The last few lifecycle events, newest first — this is the hook, live. */
+  readonly events = signal<readonly NgxToastEvent[]>([]);
+
+  constructor() {
+    this.toast.setConfig({
+      onEvent: (event) =>
+        this.events.update((log) => [event, ...log].slice(0, 8)),
+    });
+  }
+
+  clearEvents(): void {
+    this.events.set([]);
+  }
+
   private readonly copy: Record<NgxToastType, string> = {
     success: 'Your changes have been saved',
     error: 'We could not reach the server',
@@ -127,6 +142,12 @@ export class AppComponent {
       title: 'Signals, zoneless, SSR-safe',
       detail:
         'Built on signals with no zone.js requirement and no @angular/animations. The overlay is only created in the browser.',
+    },
+    {
+      accent: 'var(--amber)',
+      title: 'Analytics',
+      detail:
+        'An onEvent hook tells you when a toast is shown or dismissed, and why. The library collects nothing and sends nothing anywhere — pipe it into whatever you already run.',
     },
     {
       accent: 'var(--slate)',
@@ -218,6 +239,11 @@ export class SettingsComponent {
       detail: 'Merge new defaults, applied to toasts shown afterwards.',
     },
     {
+      name: 'closeToast(id, reason?)',
+      type: 'void',
+      detail: "Attribute your own dismissals, e.g. 'programmatic'.",
+    },
+    {
       name: 'toasts',
       type: 'Signal',
       detail: 'Live toasts, newest first.',
@@ -301,6 +327,13 @@ export class SettingsComponent {
       type: "'polite' | 'assertive'",
       fallback: "'polite'",
       detail: 'Announcement politeness.',
+    },
+    {
+      name: 'onEvent',
+      type: '(e: NgxToastEvent) => void',
+      fallback: 'none',
+      detail:
+        'Called when a toast is shown or dismissed. Browser only; a throwing handler is caught and logged.',
     },
   ];
 

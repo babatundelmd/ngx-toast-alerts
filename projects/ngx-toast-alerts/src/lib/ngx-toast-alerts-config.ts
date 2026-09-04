@@ -21,6 +21,41 @@ export type NgxToastType = 'success' | 'error' | 'warning' | 'info' | 'pending';
 /** How aggressively the toast corners are rounded. */
 export type NgxToastRadius = 'soft' | 'round' | 'pill';
 
+/** Why a toast left the screen. */
+export type NgxToastDismissReason =
+  | 'timeout'
+  | 'click'
+  | 'close-button'
+  | 'backdrop'
+  | 'programmatic'
+  /** Evicted because `maxToasts` was reached for its position. */
+  | 'limit';
+
+/**
+ * Something a toast did, handed to `onEvent`. The library reports what
+ * happened and nothing more — it collects and transmits nothing itself.
+ */
+export interface NgxToastEvent {
+  readonly event: 'shown' | 'dismissed';
+  readonly id: number;
+  readonly type: NgxToastType;
+  readonly title: string;
+  readonly message: string;
+  readonly position: NgxToastPosition;
+
+  /** `Date.now()` when the event happened. */
+  readonly at: number;
+
+  /** `dismissed` only. */
+  readonly reason?: NgxToastDismissReason;
+
+  /** Milliseconds on screen. `dismissed` only. */
+  readonly visibleFor?: number;
+}
+
+/** Browser only — never fires during server rendering. */
+export type NgxToastEventHandler = (event: NgxToastEvent) => void;
+
 export interface NgxToastAlertsConfig {
   /** Milliseconds before the toast auto-dismisses. Defaults to 5000. */
   timeout?: number;
@@ -57,11 +92,16 @@ export interface NgxToastAlertsConfig {
 
   /** Politeness of the live region announcement. Defaults to `polite`. */
   ariaLive?: 'polite' | 'assertive';
+
+  /** Called when a toast is shown or dismissed. Forward it to your analytics. */
+  onEvent?: NgxToastEventHandler;
 }
 
 /** Fully resolved configuration — every option has a value. */
-export type ResolvedToastConfig = Required<Omit<NgxToastAlertsConfig, 'title'>> &
-  Pick<NgxToastAlertsConfig, 'title'>;
+export type ResolvedToastConfig = Required<
+  Omit<NgxToastAlertsConfig, 'title' | 'onEvent'>
+> &
+  Pick<NgxToastAlertsConfig, 'title' | 'onEvent'>;
 
 export const NGX_TOAST_ALERTS_DEFAULTS: ResolvedToastConfig = {
   timeout: 5000,

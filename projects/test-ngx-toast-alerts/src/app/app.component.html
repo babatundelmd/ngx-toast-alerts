@@ -61,7 +61,7 @@
       </div>
     </div>
 
-    <!-- Decorative stack: shows the product before anyone clicks anything. -->
+    <!-- Decorative: shows the product before anyone clicks. -->
     <div class="hero__art" aria-hidden="true">
       <div class="chip chip--success">
         <span class="chip__icon">
@@ -119,7 +119,7 @@
       <div class="board__controls">
         <fieldset class="field">
           <legend>Position</legend>
-          <!-- The picker is a little viewport: pick the corner you mean. -->
+          <!-- A little viewport: pick the corner you mean. -->
           <div class="viewport">
             @for (option of positions; track option) {
               <button
@@ -192,6 +192,42 @@
             <button type="button" class="pill pill--ghost" (click)="dismissAll()">
               Dismiss all
             </button>
+          </div>
+        </fieldset>
+
+        <fieldset class="field">
+          <legend>
+            Event log
+            <button type="button" class="legend-action" (click)="clearEvents()">
+              clear
+            </button>
+          </legend>
+
+          <!-- The onEvent hook, live. Nothing leaves the browser. -->
+          <div class="log" data-testid="event-log">
+            @if (events().length === 0) {
+              <p class="log__empty">
+                Fire a toast — every <code>shown</code> and
+                <code>dismissed</code> event lands here.
+              </p>
+            } @else {
+              <ol>
+                @for (entry of events(); track entry.at + '-' + entry.id + '-' + entry.event) {
+                  <li class="log__row" [attr.data-event]="entry.event">
+                    <span class="log__event">{{ entry.event }}</span>
+                    <span class="log__type" [attr.data-type]="entry.type">
+                      {{ entry.type }}
+                    </span>
+                    @if (entry.reason) {
+                      <span class="log__reason">{{ entry.reason }}</span>
+                    }
+                    @if (entry.visibleFor !== undefined) {
+                      <span class="log__ms">{{ entry.visibleFor }}ms</span>
+                    }
+                  </li>
+                }
+              </ol>
+            }
           </div>
         </fieldset>
       </div>

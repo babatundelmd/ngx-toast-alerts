@@ -47,10 +47,29 @@ const run = (command, args, cwd, { quiet = true, env } = {}) =>
 const step = (message) => console.log(`\n▸ ${message}`);
 const ok = (message) => console.log(`  ✔ ${message}`);
 
-/** The Angular version this workspace develops against. */
+/**
+ * The exact Angular version to install in the consumer.
+ *
+ * Resolved to a concrete version rather than passed through as a range:
+ * `@angular/core` peers on an *exact* `@angular/compiler`, so installing both
+ * with `^` lets npm pick different patches and fail peer resolution.
+ */
 function angularVersion() {
   const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
-  return pkg.devDependencies['@angular/core'];
+  const range = pkg.devDependencies['@angular/core'];
+  const resolved = run('npm', ['view', `@angular/core@${range}`, 'version'], root)
+    .trim()
+    .split('\n')
+    .pop()
+    // `npm view` prefixes the line with the spec when a range matches many.
+    .replace(/^.*?['\s]([0-9][^'\s]*)'?$/, '$1')
+    .replace(/'/g, '')
+    .trim();
+
+  if (!/^\d+\.\d+\.\d+/.test(resolved)) {
+    throw new Error(`Could not resolve a concrete Angular version from "${range}"`);
+  }
+  return resolved;
 }
 
 let scratch;
@@ -83,6 +102,7 @@ try {
   );
 
   const ng = angularVersion();
+  ok(`pinning Angular ${ng} for the consumer`);
   run(
     'npm',
     [
@@ -176,6 +196,9 @@ import {
   type NgxToastPosition,
   type NgxToastRadius,
   type NgxToastType,
+  type NgxToastEvent,
+  type NgxToastEventHandler,
+  type NgxToastDismissReason,
   type Toast,
 } from 'ngx-toast-alerts';
 
@@ -189,7 +212,7 @@ export class Notifier {
     const id: number = this.toast.success('Saved');
     this.toast.center('Centred', 'pending', { radius: 'pill' });
     this.toast.show('warning', 'Careful', { showProgress: true });
-    this.toast.closeToast(id);
+    this.toast.closeToast(id, 'programmatic');
     this.toast.dismissAll();
     return id;
   }
@@ -203,11 +226,19 @@ export class Notifier {
 const position: NgxToastPosition = 'bottom-center';
 const radius: NgxToastRadius = 'soft';
 const type: NgxToastType = 'error';
-const config: NgxToastAlertsConfig = { position, radius, timeout: 1000 };
+const reason: NgxToastDismissReason = 'close-button';
+const onEvent: NgxToastEventHandler = (e: NgxToastEvent) => {
+  const kind: 'shown' | 'dismissed' = e.event;
+  const why: NgxToastDismissReason | undefined = e.reason;
+  const ms: number | undefined = e.visibleFor;
+  void kind; void why; void ms;
+};
+const config: NgxToastAlertsConfig = { position, radius, timeout: 1000, onEvent };
 
 export const surface = {
   config,
   type,
+  reason,
   token: NGX_TOAST_ALERTS_CONFIG,
   defaults: NGX_TOAST_ALERTS_DEFAULTS,
   component: NgxToastAlertsComponent,

@@ -25,6 +25,7 @@ this.toast.center('Read the full tutorial', 'pending', { title: 'Notifications U
 - [Installation](#installation)
 - [Setup](#setup)
 - [Usage](#usage)
+- [Events and analytics](#events-and-analytics)
 - [Positions](#positions)
 - [Configuration](#configuration)
 - [Styling](#styling)
@@ -186,6 +187,67 @@ Pass `backdrop: false` for a centred toast with no dimming.
 | `toasts` | Signal of the live toasts, newest first. |
 | `toastsByPosition` | Signal of the live toasts grouped by position. |
 
+## Events and analytics
+
+`onEvent` tells you when a toast is shown or dismissed, and why. **The library
+collects nothing and transmits nothing** — no device data, no location, no
+network calls. It hands you the event; where it goes is entirely your choice.
+
+```ts
+provideNgxToastAlerts({
+  onEvent: (event) => {
+    analytics.track('toast', {
+      type: event.type,        // 'success' | 'error' | 'warning' | 'info' | 'pending'
+      reason: event.reason,    // why it went away
+      visibleFor: event.visibleFor,
+    });
+  },
+});
+```
+
+### The event
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `event` | `'shown' \| 'dismissed'` | Which end of the lifecycle |
+| `id` | `number` | Matches the id returned by `success()` and friends |
+| `type` | `NgxToastType` | The toast type |
+| `title` / `message` | `string` | As rendered |
+| `position` | `NgxToastPosition` | Where it was anchored |
+| `at` | `number` | `Date.now()` when it happened |
+| `reason` | `NgxToastDismissReason` | `dismissed` only |
+| `visibleFor` | `number` | Milliseconds on screen, `dismissed` only |
+
+### Dismissal reasons
+
+| Reason | Meaning |
+| --- | --- |
+| `timeout` | Expired on its own — nobody interacted |
+| `click` | The toast body was clicked |
+| `close-button` | The × was pressed |
+| `backdrop` | The backdrop behind a centred toast was clicked |
+| `programmatic` | `closeToast()` or `dismissAll()` was called |
+| `limit` | Evicted because `maxToasts` was reached |
+
+`reason` plus `visibleFor` is the useful pair: a short `visibleFor` next to
+`click` means people are swatting toasts away, while `timeout` on an error
+toast means nobody is reading it.
+
+You can attribute your own dismissals too:
+
+```ts
+toast.closeToast(id, 'programmatic');
+```
+
+### Notes
+
+- **Browser only.** Nothing is emitted during server rendering, so a toast is
+  not double-counted when the page hydrates.
+- **A throwing handler cannot break rendering.** Exceptions are caught and
+  logged with `console.error`.
+- **Usually set once**, in `provideNgxToastAlerts()`. A per-toast `onEvent`
+  overrides it for that toast, which is occasionally handy for one-off tracking.
+
 ## Positions
 
 `top-left` · `top-center` · `top-right` · `bottom-left` · `bottom-center` ·
@@ -218,6 +280,7 @@ single toast.
 | `maxToasts` | `number` | `5` | Cap per position; oldest are dropped. |
 | `title` | `string` | per type | Override the heading. |
 | `ariaLive` | `'polite' \| 'assertive'` | `'polite'` | Announcement politeness. |
+| `onEvent` | `(e: NgxToastEvent) => void` | — | Called when a toast is shown or dismissed. See [Events](#events-and-analytics). |
 
 ## Styling
 

@@ -1,7 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { PLATFORM_ID } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { NGX_TOAST_ALERTS_CONFIG } from './ngx-toast-alerts-config';
+import {
+  NGX_TOAST_ALERTS_CONFIG,
+  NgxToastEvent,
+  NgxToastEventHandler,
+} from './ngx-toast-alerts-config';
 import {
   NgxToastAlertsService,
   TOAST_EXIT_DURATION,
@@ -338,5 +342,164 @@ describe('NgxToastAlertsService with injected config', () => {
     expect(toast.config.timeout).toBe(1234);
     // Unspecified options still fall back to the library defaults.
     expect(toast.config.showCloseButton).toBe(true);
+  });
+});
+
+describe('NgxToastAlertsService event hooks', () => {
+  let service: NgxToastAlertsService;
+  let events: NgxToastEvent[];
+  let onEvent: NgxToastEventHandler;
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    events = [];
+    onEvent = (event) => events.push(event);
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: NGX_TOAST_ALERTS_CONFIG, useValue: { onEvent } },
+      ],
+    });
+    service = TestBed.inject(NgxToastAlertsService);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  const flushExit = () => vi.advanceTimersByTime(TOAST_EXIT_DURATION + 1);
+
+  it('emits "shown" with the toast details', () => {
+    const id = service.success('Saved', { position: 'bottom-left' });
+
+    expect(events).toHaveLength(1);
+    expect(events[0]).toEqual(
+      expect.objectContaining({
+        event: 'shown',
+        id,
+        type: 'success',
+        title: 'Success',
+        message: 'Saved',
+        position: 'bottom-left',
+      }),
+    );
+    expect(typeof events[0].at).toBe('number');
+  });
+
+  it('does not attach a reason or duration to "shown"', () => {
+    service.info('hello');
+
+    expect(events[0].reason).toBeUndefined();
+    expect(events[0].visibleFor).toBeUndefined();
+  });
+
+  it('emits "dismissed" with reason "timeout" when it expires', () => {
+    service.info('transient', { timeout: 1000 });
+    vi.advanceTimersByTime(1000);
+
+    const dismissed = events.filter((event) => event.event === 'dismissed');
+    expect(dismissed).toHaveLength(1);
+    expect(dismissed[0].reason).toBe('timeout');
+  });
+
+  it('emits "dismissed" with reason "programmatic" by default', () => {
+    const id = service.info('bye', { disableTimeout: true });
+    service.closeToast(id);
+
+    expect(events.at(-1)).toEqual(
+      expect.objectContaining({ event: 'dismissed', reason: 'programmatic' }),
+    );
+  });
+
+  it('passes an explicit reason through closeToast', () => {
+    const id = service.info('bye', { disableTimeout: true });
+    service.closeToast(id, 'close-button');
+
+    expect(events.at(-1)?.reason).toBe('close-button');
+  });
+
+  it('emits "dismissed" with reason "limit" when a toast is evicted', () => {
+    service.info('first', { maxToasts: 1, disableTimeout: true });
+    service.info('second', { maxToasts: 1, disableTimeout: true });
+
+    const evicted = events.find((event) => event.reason === 'limit');
+    expect(evicted).toBeDefined();
+    expect(evicted?.message).toBe('first');
+  });
+
+  it('reports how long the toast was visible', () => {
+    const id = service.info('lingering', { disableTimeout: true });
+    vi.advanceTimersByTime(1500);
+    service.closeToast(id);
+
+    expect(events.at(-1)?.visibleFor).toBeGreaterThanOrEqual(1500);
+  });
+
+  it('emits one dismissal per toast for dismissAll', () => {
+    service.info('a', { disableTimeout: true });
+    service.info('b', { disableTimeout: true });
+    events.length = 0;
+
+    service.dismissAll();
+
+    expect(events).toHaveLength(2);
+    expect(events.every((event) => event.event === 'dismissed')).toBe(true);
+  });
+
+  it('does not emit twice when a toast is closed repeatedly', () => {
+    const id = service.info('once', { disableTimeout: true });
+    service.closeToast(id);
+    service.closeToast(id);
+    flushExit();
+
+    expect(events.filter((event) => event.event === 'dismissed')).toHaveLength(1);
+  });
+
+  it('survives a handler that throws', () => {
+    const consoleError = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => undefined);
+
+    service.setConfig({
+      onEvent: () => {
+        throw new Error('analytics is down');
+      },
+    });
+
+    // Rendering must be unaffected by a broken handler.
+    expect(() => service.success('still works')).not.toThrow();
+    expect(service.toasts()).toHaveLength(1);
+    expect(consoleError).toHaveBeenCalled();
+
+    consoleError.mockRestore();
+  });
+
+  it('accepts a per-toast handler that overrides the global one', () => {
+    const local: NgxToastEvent[] = [];
+    service.info('scoped', { onEvent: (event) => local.push(event) });
+
+    expect(local).toHaveLength(1);
+    expect(events).toHaveLength(0);
+  });
+});
+
+describe('NgxToastAlertsService event hooks on the server', () => {
+  it('never emits, so hydration cannot double-count a toast', () => {
+    const events: NgxToastEvent[] = [];
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: PLATFORM_ID, useValue: 'server' },
+        {
+          provide: NGX_TOAST_ALERTS_CONFIG,
+          useValue: { onEvent: (event: NgxToastEvent) => events.push(event) },
+        },
+      ],
+    });
+
+    const service = TestBed.inject(NgxToastAlertsService);
+    service.success('rendered on the server');
+    service.dismissAll();
+
+    expect(service.toasts()).toHaveLength(0);
+    expect(events).toHaveLength(0);
   });
 });

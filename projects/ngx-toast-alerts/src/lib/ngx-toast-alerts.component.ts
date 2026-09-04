@@ -12,17 +12,11 @@ interface ToastGroup {
   toasts: readonly Toast[];
 }
 
-/**
- * Renders every live toast. The library mounts this itself through
- * `ToastOverlayService`, so it never needs to be added to a template.
- */
+/** Mounted by `ToastOverlayService`; never added to a template by hand. */
 @Component({
   selector: 'ngx-toast-alerts',
   template: `
-    <!--
-      Persistent live regions. They exist before any toast is added so screen
-      readers reliably announce the content that lands inside them.
-    -->
+    <!-- Live regions must exist before content lands in them to be announced. -->
     <div class="ngx-toast-live" aria-live="polite" aria-atomic="true">
       {{ politeAnnouncement() }}
     </div>
@@ -153,14 +147,14 @@ export class NgxToastAlertsComponent {
 
   protected onToastClick(toast: Toast): void {
     if (this.toastService.isCloseableOnClick(toast.id)) {
-      this.toastService.closeToast(toast.id);
+      this.toastService.closeToast(toast.id, 'click');
     }
   }
 
   protected onClose(event: Event, toast: Toast): void {
     // Never let the close button also trigger the body click handler.
     event.stopPropagation();
-    this.toastService.closeToast(toast.id);
+    this.toastService.closeToast(toast.id, 'close-button');
   }
 
   protected onPointerEnter(toast: Toast): void {
@@ -175,7 +169,7 @@ export class NgxToastAlertsComponent {
     }
   }
 
-  /** Dismiss a centred toast when the dimmed backdrop behind it is clicked. */
+  /** Dismiss centred toasts when the backdrop is clicked. */
   protected onBackdropClick(): void {
     for (const toast of this.toastService.toasts()) {
       if (
@@ -183,7 +177,7 @@ export class NgxToastAlertsComponent {
         toast.config.clickToClose &&
         !toast.leaving
       ) {
-        this.toastService.closeToast(toast.id);
+        this.toastService.closeToast(toast.id, 'backdrop');
       }
     }
   }

@@ -4,6 +4,8 @@ import {
   NGX_TOAST_ALERTS_CONFIG,
   NGX_TOAST_ALERTS_DEFAULTS,
   NgxToastAlertsConfig,
+  NgxToastDismissReason,
+  NgxToastEvent,
   NgxToastPosition,
   NgxToastType,
   ResolvedToastConfig,
@@ -87,7 +89,7 @@ export class NgxToastAlertsService {
     inject(DestroyRef).onDestroy(() => this.clearAllTimers());
   }
 
-  /** Merge new defaults over the current ones. Affects toasts shown afterwards. */
+  /** Merge new defaults. Applies to toasts shown afterwards. */
   setConfig(config: NgxToastAlertsConfig): void {
     this.defaultConfig = { ...this.defaultConfig, ...config };
   }
@@ -136,7 +138,7 @@ export class NgxToastAlertsService {
     message: string,
     config?: NgxToastAlertsConfig,
   ): number {
-    // Mount the overlay lazily: apps that never toast never pay for it.
+    // Lazy: apps that never toast never pay for the overlay.
     this.toastOverlay.createToastOverlay();
 
     const resolved: ResolvedToastConfig = { ...this.defaultConfig, ...config };
@@ -158,22 +160,25 @@ export class NgxToastAlertsService {
       this.startTimer(toast.id, resolved.timeout);
     }
 
+    this.emit(toast, 'shown');
+
     return toast.id;
   }
 
-  /**
-   * Dismiss a toast. The toast animates out first and is removed from the
-   * queue once the exit animation has finished.
-   */
-  closeToast(id: number): void {
-    const exists = this.toastQueue().some(
+  /** Animates the toast out, then removes it once the animation finishes. */
+  closeToast(
+    id: number,
+    reason: NgxToastDismissReason = 'programmatic',
+  ): void {
+    const closing = this.toastQueue().find(
       (toast) => toast.id === id && !toast.leaving,
     );
-    if (!exists) {
+    if (!closing) {
       return;
     }
 
     this.stopTimer(id);
+    this.emit(closing, 'dismissed', reason);
     this.toastQueue.update((queue) =>
       queue.map((toast) => (toast.id === id ? { ...toast, leaving: true } : toast)),
     );
@@ -238,7 +243,7 @@ export class NgxToastAlertsService {
     this.stopTimer(id);
     const handle = setTimeout(() => {
       this.timers.delete(id);
-      this.closeToast(id);
+      this.closeToast(id, 'timeout');
     }, duration);
     this.timers.set(id, {
       handle,
@@ -262,10 +267,7 @@ export class NgxToastAlertsService {
     this.toastQueue.update((queue) => queue.filter((toast) => toast.id !== id));
   }
 
-  /**
-   * Trim the queue down to `maxToasts` per position, dropping the oldest
-   * entries in that position first.
-   */
+  /** Trim to `maxToasts` per position, oldest first. */
   private enforceLimit(
     queue: readonly Toast[],
     config: ResolvedToastConfig,
@@ -280,12 +282,47 @@ export class NgxToastAlertsService {
       const count = seen.get(toast.config.position) ?? 0;
       if (count >= config.maxToasts) {
         this.stopTimer(toast.id);
+        this.emit(toast, 'dismissed', 'limit');
         continue;
       }
       seen.set(toast.config.position, count + 1);
       kept.push(toast);
     }
     return kept;
+  }
+
+  /**
+   * Browser only, so hydration cannot double-count a toast. A throwing
+   * handler is contained here — analytics must never break rendering.
+   */
+  private emit(
+    toast: Toast,
+    event: NgxToastEvent['event'],
+    reason?: NgxToastDismissReason,
+  ): void {
+    const handler = toast.config.onEvent;
+    if (!handler || !this.isBrowser) {
+      return;
+    }
+
+    const payload: NgxToastEvent = {
+      event,
+      id: toast.id,
+      type: toast.type,
+      title: toast.title,
+      message: toast.message,
+      position: toast.config.position,
+      at: Date.now(),
+      ...(event === 'dismissed'
+        ? { reason, visibleFor: Date.now() - toast.createdAt }
+        : {}),
+    };
+
+    try {
+      handler(payload);
+    } catch (error) {
+      console.error('[ngx-toast-alerts] onEvent handler threw:', error);
+    }
   }
 
   private clearAllTimers(): void {

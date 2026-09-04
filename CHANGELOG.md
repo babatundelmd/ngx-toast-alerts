@@ -7,6 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.1.0] - 2026-09-01
+
+Toast lifecycle events, so you can measure how your notifications are actually
+doing — without the library collecting or transmitting anything.
+
+### Added
+
+- **`onEvent` hook.** Called when a toast is shown or dismissed, with the type,
+  title, message, position, a timestamp, why it went away, and how long it was
+  on screen. Set it once in `provideNgxToastAlerts()` and forward it to whatever
+  analytics you already run:
+
+  ```ts
+  provideNgxToastAlerts({
+    onEvent: (e) => analytics.track('toast', { type: e.type, reason: e.reason }),
+  });
+  ```
+
+  **The library collects nothing and sends nothing anywhere.** There is no
+  network call, no device fingerprinting and no location lookup — it reports
+  what happened inside your own application and the data never leaves it.
+- **`NgxToastDismissReason`** distinguishing `timeout`, `click`, `close-button`,
+  `backdrop`, `programmatic` and `limit`. Paired with `visibleFor`, this is what
+  tells you whether people are reading a toast or swatting it away.
+- **`NgxToastEvent` and `NgxToastEventHandler`** types on the public API.
+- `closeToast(id, reason?)` accepts a reason, so an application can attribute
+  its own dismissals. The existing one-argument call is unchanged.
+- A live event log in the playground on the
+  [documentation site](https://babatundelmd.github.io/ngx-toast-alerts/), so you
+  can see the hook working before installing anything.
+
+### Notes
+
+- Events fire in the browser only — never during server rendering, so a toast is
+  not counted twice when the page hydrates.
+- A handler that throws is caught and logged rather than allowed to break toast
+  rendering.
+
 ## [3.0.1] - 2026-09-01
 
 Tooling only — the library code and its README are byte-for-byte identical to
@@ -170,7 +208,8 @@ applications only need the dependency bump. Beyond that:
 > Entries before 3.0.0 were reconstructed from the published release history;
 > the 2.0.1–2.0.7 patch releases are folded into the 2.0.8 entry.
 
-[Unreleased]: https://github.com/babatundelmd/ngx-toast-alerts/compare/v3.0.1...HEAD
+[Unreleased]: https://github.com/babatundelmd/ngx-toast-alerts/compare/v3.1.0...HEAD
+[3.1.0]: https://github.com/babatundelmd/ngx-toast-alerts/compare/v3.0.1...v3.1.0
 [3.0.1]: https://github.com/babatundelmd/ngx-toast-alerts/compare/v3.0.0...v3.0.1
 [3.0.0]: https://github.com/babatundelmd/ngx-toast-alerts/compare/v2.0.8...v3.0.0
 [2.0.8]: https://github.com/babatundelmd/ngx-toast-alerts/compare/v2.0.0...v2.0.8
