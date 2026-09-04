@@ -1,6 +1,6 @@
 {
   "name": "ngx-toast-alerts",
-  "version": "3.0.1",
+  "version": "3.1.0",
   "description": "A rounded, animated toast notification library for Angular — including a centred, spring-animated toast.",
   "author": "Babatunde Lamidi",
   "license": "MIT",

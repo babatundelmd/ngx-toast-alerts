@@ -1,18 +1,11 @@
-// ngx-toast-alerts — visual layer.
-//
-// Theming contract: the library NEVER declares a `--ngx-toast-*` property. It
-// only ever *reads* one, with a fallback, into a private `--_*` token:
+// Theming contract: NEVER declare a `--ngx-toast-*` property here, only read
+// one into a private `--_*` token:
 //
 //     --_radius: var(--ngx-toast-radius, 20px);
 //
-// That matters because `:host` compiles to an attribute selector with higher
-// specificity than a consumer's `ngx-toast-alerts { … }` rule, and a value
-// declared on the host also beats one inherited from `:root`. Declaring the
-// public tokens here would silently override every consumer's theme. Reading
-// them instead means a consumer can set them anywhere up the tree — `:root`,
-// `body`, or the host element — and always win.
-//
-// No web fonts are fetched: the default stack is the host platform's UI font.
+// `:host` outranks both a consumer's `ngx-toast-alerts {}` rule and anything
+// inherited from `:root`, so declaring a public token silently discards every
+// override. Enforced by `npm run lint:tokens`.
 
 :host {
   // Surface
@@ -71,8 +64,7 @@
   display: block;
 }
 
-// Dark defaults. A consumer who sets the public token pins that value in both
-// themes, which is the point — they have opted out of the automatic switch.
+// A consumer-set token pins that value in both themes, by design.
 @media (prefers-color-scheme: dark) {
   :host {
     --_surface: var(--ngx-toast-surface, #171a21);
@@ -88,7 +80,7 @@
   }
 }
 
-// Screen-reader-only announcement regions.
+// Screen-reader only.
 .ngx-toast-live {
   position: absolute;
   width: 1px;
@@ -123,7 +115,7 @@
   flex-direction: column;
   gap: var(--_gap);
   width: min(var(--_width), calc(100vw - var(--_offset) * 2));
-  // The stack itself must never swallow clicks meant for the page beneath it.
+  // Must not swallow clicks meant for the page beneath.
   pointer-events: none;
 
   &[data-position='top-right'] {
@@ -161,8 +153,7 @@
     flex-direction: column-reverse;
   }
 
-  // The centred stack spans the viewport and centres its children, so the
-  // toast can animate purely on scale/blur without fighting a transform offset.
+  // Spans the viewport so the toast animates on scale/blur alone.
   &[data-position='center'] {
     inset: 0;
     width: auto;
@@ -206,8 +197,7 @@
       0 22px 44px -16px color-mix(in srgb, var(--_accent) 70%, transparent);
   }
 
-  // --- Shape presets -------------------------------------------------------
-  // Each preset is only a fallback: an explicit --ngx-toast-radius still wins.
+  // Presets are fallbacks — an explicit --ngx-toast-radius still wins.
   &[data-radius='soft'] {
     --_radius: var(--ngx-toast-radius, 12px);
     --_icon-radius: var(--ngx-toast-icon-radius, 10px);
@@ -432,8 +422,7 @@
   }
 }
 
-// The centred toast is the showpiece: it springs forward out of a blur,
-// overshoots very slightly, then settles.
+// Springs out of a blur, overshoots slightly, settles.
 @keyframes ngx-toast-center-in {
   0% {
     opacity: 0;
@@ -474,7 +463,7 @@
   }
 }
 
-// Used only under `prefers-reduced-motion` — opacity alone, no movement.
+// Reduced-motion only: opacity, no movement.
 @keyframes ngx-toast-fade-in {
   from {
     opacity: 0;
@@ -554,7 +543,7 @@
     }
   }
 
-  // A leaving toast must not react to the pointer any more.
+
   &.is-leaving {
     pointer-events: none;
   }
@@ -576,10 +565,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  // These selectors deliberately carry `[data-position]` so they match the
-  // specificity of the per-position rules above and, coming later, win. A bare
-  // `.ngx-toast` here would lose, and the card would still slide and scale —
-  // just over 1ms instead of 460ms.
+  // `[data-position]` is required: it matches the specificity of the
+  // per-position rules above so these win. A bare `.ngx-toast` would lose and
+  // the card would still slide, just over 1ms.
   .ngx-toast[data-position] {
     animation: ngx-toast-fade-in 1ms linear both;
     transition: none;

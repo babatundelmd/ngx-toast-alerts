@@ -2,10 +2,7 @@ import { ApplicationRef, ComponentRef, createComponent, DestroyRef, DOCUMENT, En
 import { isPlatformBrowser } from '@angular/common';
 import { NgxToastAlertsComponent } from './ngx-toast-alerts.component';
 
-/**
- * Owns the single `<ngx-toast-alerts>` host that the library appends to
- * `<body>`. Consumers never place the component in a template themselves.
- */
+/** Owns the single `<ngx-toast-alerts>` host appended to `<body>`. */
 @Service()
 export class ToastOverlayService {
   private componentRef: ComponentRef<NgxToastAlertsComponent> | null = null;
@@ -19,7 +16,7 @@ export class ToastOverlayService {
     inject(DestroyRef).onDestroy(() => this.destroyToastOverlay());
   }
 
-  /** Mount the overlay host. Safe to call repeatedly and on the server. */
+  /** Idempotent, and a no-op on the server. */
   createToastOverlay(): void {
     if (!this.isBrowser || this.componentRef) {
       return;
@@ -33,7 +30,7 @@ export class ToastOverlayService {
     this.appRef.attachView(this.componentRef.hostView);
   }
 
-  /** Tear the overlay host back down. */
+
   destroyToastOverlay(): void {
     if (!this.componentRef) {
       return;
